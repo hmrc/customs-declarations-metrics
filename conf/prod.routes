@@ -1,6 +1,5 @@
-# Routes
-# This file defines all application routes (Higher priority routes first)
-# ~~~~
+->          /                       health.Routes
+->          /                       dynamicDefinition.Routes
 
 GET       /api                      uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController.helloWorld
 
