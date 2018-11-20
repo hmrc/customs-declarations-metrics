@@ -1,0 +1,6 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+GET       /api                      uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController.helloWorld
+
