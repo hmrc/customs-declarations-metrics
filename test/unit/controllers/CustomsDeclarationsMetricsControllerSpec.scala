@@ -16,27 +16,53 @@
 
 package unit.controllers
 
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{BeforeAndAfterEach, Matchers}
 import org.scalatestplus.play._
-import play.api.mvc.Result
+import play.api.libs.json.JsValue
+import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
 import play.api.test._
+import uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController
+import uk.gov.hmrc.play.test.UnitSpec
+import util.TestData.ValidRequestAsTryJsValue
 
 import scala.concurrent.Future
+import scala.util.Try
 
-class CustomsDeclarationsMetricsControllerSpec extends PlaySpec with OneAppPerTest {
+class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
+  with Matchers with MockitoSugar with BeforeAndAfterEach {
 
+ trait SetUp {
+
+ }
+
+  protected val controller = new CustomsDeclarationsMetricsController(){}
+
+  protected def awaitSubmit(request: Request[AnyContent]): Result = {
+    controller.helloWorld.apply(FakeRequest(GET, "/api"))
+  }
 
   "CustomsDeclarationsMetricsController" should {
 
-    "handle valid get and respond appropriately" in {
-      val home: Future[Result] = route(app, FakeRequest(GET, "/api")).get
+    "handle valid get and respond appropriately" in new SetUp() {
+      val home: Future[Result] = controller.helloWorld.apply(FakeRequest(GET, "/api"))
 
-      status(home) mustBe OK
-      contentType(home) mustBe Some("text/plain")
-      contentAsString(home) must include(s"Hello World!!")
+      status(home) shouldBe OK
+      contentType(home) shouldBe Some("text/plain")
+      contentAsString(home) should include("Hello World!!")
+    }
+
+      "handle valid post to logtimes endpoint and respond appropriately" in {
+
+       testSubmitResult(ValidRequestAsTryJsValue) { result =>
+          status(result) shouldBe ACCEPTED
+        }
     }
   }
 
-
+  private def testSubmitResult(request: Request[Try[JsValue]])(test: Future[Result] => Unit) {
+    test(controller.post().apply(request))
+  }
 
 }

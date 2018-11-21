@@ -17,13 +17,46 @@
 package uk.gov.hmrc.customs.declarations.metrics.controllers
 
 import javax.inject.Singleton
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc
-import play.api.mvc.Action
+import play.api.mvc.{Action, AnyContentAsEmpty, BodyParser, Result}
+import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.errorBadRequest
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class CustomsDeclarationsMetricsController extends BaseController {
+class CustomsDeclarationsMetricsController extends BaseController with HeaderValidator {
+
+  protected def tryJsonParser: BodyParser[Try[JsValue]] = parse.tolerantText.map(text => Try(Json.parse(text)))
+
+  def post(): Action[Try[JsValue]] = validateAccept(acceptHeaderValidation).async(tryJsonParser) {
+    implicit request =>
+
+      request.body match {
+
+        case Success(js) =>
+          js.validate[LogTimeRequest] match {
+            case JsSuccess(requestPayload, _) =>
+             // logger.debug(s"${LoggingHelper.logMsgPrefix(requestPayload.conversationId)} Notification passed header validation with payload containing ", url = requestPayload.url.toString, payload = requestPayload.xmlPayload)
+              //callOutboundService(requestPayload)
+              Future.successful(Accepted)
+            case error: JsError =>
+              //logger.error("JSON payload failed schema validation")
+              //Future.successful(invalidJsonErrorResponse(error).JsonResult)
+              Future.successful(InternalServerError)
+          }
+
+        case Failure(ex) =>
+          //logger.error(nonJsonBodyErrorMessage)
+          //Future.successful(errorBadRequest(nonJsonBodyErrorMessage).JsonResult)
+          Future.successful(InternalServerError)
+      }
+  }
+
 
   def helloWorld: Action[mvc.AnyContent] = Action {
     Ok("Hello World!!")
