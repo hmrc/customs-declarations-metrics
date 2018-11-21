@@ -53,11 +53,11 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
       contentAsString(home) should include("Hello World!!")
     }
 
-      "handle valid post to logtimes endpoint and respond appropriately" in {
+    "handle valid post to log-times endpoint and respond appropriately" in {
 
-       testSubmitResult(ValidRequestAsTryJsValue) { result =>
-          status(result) shouldBe ACCEPTED
-        }
+     testSubmitResult(ValidRequestAsTryJsValue) { result =>
+        status(result) shouldBe ACCEPTED
+      }
     }
   }
 

@@ -57,7 +57,6 @@ class CustomsDeclarationsMetricsController extends BaseController with HeaderVal
       }
   }
 
-
   def helloWorld: Action[mvc.AnyContent] = Action {
     Ok("Hello World!!")
   }
