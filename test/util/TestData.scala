@@ -18,7 +18,7 @@ package util
 
 import play.api.http.MimeTypes
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{AnyContentAsJson, Request}
+import play.api.mvc.{AnyContentAsJson, AnyContentAsText, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ACCEPT, CONTENT_TYPE}
 
@@ -27,7 +27,7 @@ import scala.util.Try
 object TestData {
 
 
-val ValidJson = Json.parse("""
+  val ValidJson: JsValue = Json.parse("""
        |{
        | "eventType": "DEC-START",
        | "conversationId": "dff783d7-44ee-4836-93d0-3242da7c225f",
@@ -35,12 +35,32 @@ val ValidJson = Json.parse("""
        |}
     """.stripMargin)
 
+  val InvalidJson: JsValue = Json.parse("""
+       |{
+       | "eventType": "DEC-START"
+       |}
+    """.stripMargin)
+
+  val NonJsonPayload: String = "This is a non-json payload"
 
   val ValidRequest: FakeRequest[AnyContentAsJson] = FakeRequest("POST","/log-time")
     .withHeaders(RequestHeaders.ValidHeaders.toSeq: _*)
     .withJsonBody(ValidJson)
 
+  val InvalidRequest: FakeRequest[AnyContentAsJson] = FakeRequest("POST","/log-time")
+    .withHeaders(RequestHeaders.ValidHeaders.toSeq: _*)
+    .withJsonBody(InvalidJson)
+
+  val InvalidAcceptHeaderRequest: FakeRequest[Try[JsValue]] = FakeRequest()
+    .withHeaders(RequestHeaders.ACCEPT_HEADER_INVALID, RequestHeaders.CONTENT_TYPE_HEADER).withBody(Try(ValidJson))
+
+  val NoAcceptHeaderRequest: FakeRequest[Try[JsValue]] = FakeRequest()
+    .withHeaders(RequestHeaders.CONTENT_TYPE_HEADER).withBody(Try(ValidJson))
+
   val ValidRequestAsTryJsValue: Request[Try[JsValue]] = ValidRequest.copyFakeRequest[Try[JsValue]](body = Try(ValidRequest.body.json))
+  val InvalidRequestAsTryJsValue: Request[Try[JsValue]] = InvalidRequest.copyFakeRequest[Try[JsValue]](body = Try(InvalidRequest.body.json))
+  val NonJsonPayloadRequest: FakeRequest[AnyContentAsText] = ValidRequest.withTextBody(NonJsonPayload)
+
 }
 
 

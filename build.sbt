@@ -103,6 +103,7 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   coverageExcludedPackages := List(
     "<empty>"
     ,"Reverse.*"
+    ,"uk\\.gov\\.hmrc\\.customs\\.declarations\\.metrics\\.model\\..*"
     ,".*(BuildInfo|Routes).*"
   ).mkString(";"),
   coverageMinimum := 99,

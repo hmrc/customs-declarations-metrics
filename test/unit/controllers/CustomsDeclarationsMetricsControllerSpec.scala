@@ -16,16 +16,22 @@
 
 package unit.controllers
 
+import org.mockito.ArgumentMatchers.any
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, Matchers}
+import play.api.libs.json
 import play.api.libs.json.JsValue
 import play.api.mvc.{Request, Result}
 import play.api.test.Helpers._
 import play.api.test._
+import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController
+import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
-import util.TestData.ValidRequestAsTryJsValue
+import util.MockitoPassByNameHelper.PassByNameVerifier
+import util.TestData._
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -35,12 +41,16 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
 
   trait SetUp {
     val mockLogger = mock[CdsLogger]
-    val controller = new CustomsDeclarationsMetricsController(mockLogger){}
+    val mockService = mock[MetricsService]
+    val controller = new CustomsDeclarationsMetricsController(mockLogger, mockService) {}
 
     def testSubmitResult(request: Request[Try[JsValue]])(test: Future[Result] => Unit) {
       test(controller.post().apply(request))
     }
- }
+  }
+
+  private val wrongPayloadErrorResult = ErrorResponse(BAD_REQUEST, errorCode = "BAD_REQUEST",
+    message = "Request does not contain a valid JSON body").JsonResult
 
   "CustomsDeclarationsMetricsController" should {
 
@@ -52,12 +62,40 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
       contentAsString(home) should include("Hello World!!")
     }
 
-    "handle valid post to log-times endpoint and respond appropriately" in new SetUp() {
+    "respond with status 406 for an invalid Accept header" in new SetUp() {
+      testSubmitResult(InvalidAcceptHeaderRequest) { result =>
+        status(result) shouldBe NOT_ACCEPTABLE
+      }
+    }
 
-     testSubmitResult(ValidRequestAsTryJsValue) { result =>
+    "respond with status 406 when Accept header is not set in request" in new SetUp() {
+      testSubmitResult(NoAcceptHeaderRequest) { result =>
+        status(result) shouldBe NOT_ACCEPTABLE
+      }
+    }
+
+    "handle valid post to log-times endpoint and respond appropriately" in new SetUp() {
+      testSubmitResult(ValidRequestAsTryJsValue) { result =>
         status(result) shouldBe ACCEPTED
       }
     }
-  }
 
+    "handle invalid post to log-times endpoint and respond appropriately" in new SetUp() {
+      testSubmitResult(InvalidRequestAsTryJsValue) { result =>
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+      }
+    }
+
+    "respond with status 400 for a non well-formed JSON payload" in new SetUp() {
+      testSubmitResult(NonJsonPayloadRequest.copyFakeRequest(body = Try(json.Json.parse("")))) { result =>
+        status(result) shouldBe BAD_REQUEST
+        await(result) shouldBe wrongPayloadErrorResult
+      }
+
+      PassByNameVerifier(mockLogger, "error")
+        .withByNameParam[String]("Request does not contain a valid JSON body")
+        .verify()
+    }
+
+  }
 }
