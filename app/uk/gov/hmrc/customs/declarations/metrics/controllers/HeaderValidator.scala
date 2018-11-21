@@ -19,6 +19,7 @@ package uk.gov.hmrc.customs.declarations.metrics.controllers
 import play.api.http.{HeaderNames, MimeTypes}
 import play.api.mvc.{ActionBuilder, Request, Result, Results}
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorAcceptHeaderInvalid
+import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 
 import scala.concurrent.Future
 
@@ -28,22 +29,22 @@ trait HeaderValidator extends Results {
 
   val acceptHeaderValidation: (Option[String] => Boolean) = _ exists (validAcceptHeaders.contains(_))
 
-  //val notificationLogger: NotificationLogger
+  val logger: CdsLogger
 
   def validateAccept(rules: Option[String] => Boolean): ActionBuilder[Request] = new ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-      //val logMessage = "Received notification"
+      val logMessage = "Received log-time request"
       val headers = request.headers.headers
-      //notificationLogger.debug(logMessage, headers)
+      logger.debug(s"$logMessage with headers $headers")
 
       val acceptHeader = HeaderNames.ACCEPT
       val hasAccept = rules(request.headers.get(acceptHeader))
 
       if (hasAccept) {
-        //notificationLogger.debug(s"$acceptHeader header passed validation", headers)
+        logger.debug(s"$acceptHeader header passed validation from headers $headers")
         block(request)
       } else {
-       // notificationLogger.debug(s"$acceptHeader header failed validation", headers)
+        logger.debug(s"$acceptHeader header failed validation from headers $headers")
         Future.successful(ErrorAcceptHeaderInvalid.JsonResult)
       }
     }

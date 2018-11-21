@@ -31,7 +31,7 @@ val ValidJson = Json.parse("""
        |{
        | "eventType": "DEC-START",
        | "conversationId": "dff783d7-44ee-4836-93d0-3242da7c225f",
-       | "logTimeStamp": "2014-10-23T00:35:14Z"
+       | "logTimeStamp": "2014-10-23T00:35:14.123Z"
        |}
     """.stripMargin)
 

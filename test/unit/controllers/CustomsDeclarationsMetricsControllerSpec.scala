@@ -18,11 +18,11 @@ package unit.controllers
 
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, Matchers}
-import org.scalatestplus.play._
 import play.api.libs.json.JsValue
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.mvc.{Request, Result}
 import play.api.test.Helpers._
 import play.api.test._
+import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController
 import uk.gov.hmrc.play.test.UnitSpec
 import util.TestData.ValidRequestAsTryJsValue
@@ -33,15 +33,14 @@ import scala.util.Try
 class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
   with Matchers with MockitoSugar with BeforeAndAfterEach {
 
- trait SetUp {
+  trait SetUp {
+    val mockLogger = mock[CdsLogger]
+    val controller = new CustomsDeclarationsMetricsController(mockLogger){}
 
+    def testSubmitResult(request: Request[Try[JsValue]])(test: Future[Result] => Unit) {
+      test(controller.post().apply(request))
+    }
  }
-
-  protected val controller = new CustomsDeclarationsMetricsController(){}
-
-  protected def awaitSubmit(request: Request[AnyContent]): Result = {
-    controller.helloWorld.apply(FakeRequest(GET, "/api"))
-  }
 
   "CustomsDeclarationsMetricsController" should {
 
@@ -53,16 +52,12 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
       contentAsString(home) should include("Hello World!!")
     }
 
-    "handle valid post to log-times endpoint and respond appropriately" in {
+    "handle valid post to log-times endpoint and respond appropriately" in new SetUp() {
 
      testSubmitResult(ValidRequestAsTryJsValue) { result =>
         status(result) shouldBe ACCEPTED
       }
     }
-  }
-
-  private def testSubmitResult(request: Request[Try[JsValue]])(test: Future[Result] => Unit) {
-    test(controller.post().apply(request))
   }
 
 }

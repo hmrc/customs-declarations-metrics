@@ -103,7 +103,7 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   coverageExcludedPackages := List(
     "<empty>"
     ,"Reverse.*"
-    ,".*(AuthService|BuildInfo|Routes).*"
+    ,".*(BuildInfo|Routes).*"
   ).mkString(";"),
   coverageMinimum := 99,
   coverageFailOnMinimum := true,

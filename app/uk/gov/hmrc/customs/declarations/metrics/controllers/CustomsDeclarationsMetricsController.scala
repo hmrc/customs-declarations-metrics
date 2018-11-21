@@ -16,20 +16,20 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.controllers
 
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
+
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc
-import play.api.mvc.{Action, AnyContentAsEmpty, BodyParser, Result}
-import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.errorBadRequest
+import play.api.mvc.{Action, BodyParser}
+import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 @Singleton
-class CustomsDeclarationsMetricsController extends BaseController with HeaderValidator {
+class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger) extends BaseController with HeaderValidator {
 
   protected def tryJsonParser: BodyParser[Try[JsValue]] = parse.tolerantText.map(text => Try(Json.parse(text)))
 
@@ -41,17 +41,17 @@ class CustomsDeclarationsMetricsController extends BaseController with HeaderVal
         case Success(js) =>
           js.validate[LogTimeRequest] match {
             case JsSuccess(requestPayload, _) =>
-             // logger.debug(s"${LoggingHelper.logMsgPrefix(requestPayload.conversationId)} Notification passed header validation with payload containing ", url = requestPayload.url.toString, payload = requestPayload.xmlPayload)
+              logger.debug(s"Log-time endpoint called with payload $requestPayload and headers ${request.headers}")
               //callOutboundService(requestPayload)
               Future.successful(Accepted)
             case error: JsError =>
-              //logger.error("JSON payload failed schema validation")
+              logger.error(s"JSON payload failed schema validation with error $error")
               //Future.successful(invalidJsonErrorResponse(error).JsonResult)
               Future.successful(InternalServerError)
           }
 
         case Failure(ex) =>
-          //logger.error(nonJsonBodyErrorMessage)
+          logger.error(ex.getMessage)
           //Future.successful(errorBadRequest(nonJsonBodyErrorMessage).JsonResult)
           Future.successful(InternalServerError)
       }
