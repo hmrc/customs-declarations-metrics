@@ -21,16 +21,15 @@ import java.util.UUID
 
 import play.api.libs.json._
 
-case class EventType(eventTypeString: String)
+case class EventType(eventTypeString: String) extends AnyVal
 object EventType {
-implicit val eventTypeJF: Format[EventType] = new Format[EventType] {
-  def writes(eventTypeString: EventType) = JsString(eventTypeString.toString)
-  def reads(json: JsValue): JsResult[EventType] = json match {
-    case JsNull => JsError()
-    case _ => JsSuccess(EventType(json.as[String]))
+  implicit val eventTypeJF: Format[EventType] = new Format[EventType] {
+    def writes(eventType: EventType) = JsString(eventType.eventTypeString)
+    def reads(json: JsValue): JsResult[EventType] = json match {
+      case JsNull => JsError()
+      case _ => JsSuccess(EventType(json.as[String]))
+    }
   }
-}
-
 }
 
 case class ConversationId(id: UUID) extends AnyVal {
