@@ -19,9 +19,10 @@ package uk.gov.hmrc.customs.declarations.metrics.repo
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
+import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.LogTimeRequest
+import uk.gov.hmrc.customs.declarations.metrics.model.EventTime
 import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,26 +31,36 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[MetricsMongoRepo])
 trait MetricsRepo {
 
-  def create(logTimeRequest: LogTimeRequest): Future[Boolean]
+  def save(eventTime: EventTime): Future[Boolean]
 
 }
 
 
 class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
                                   errorHandler: MetricsRepoErrorHandler,
-                                  logger: CdsLogger) extends ReactiveRepository[LogTimeRequest, BSONObjectID](
+                                  logger: CdsLogger) extends ReactiveRepository[EventTime, BSONObjectID](
   collectionName = "logTimes",
   mongo = mongoDbProvider.mongo,
-  domainFormat = LogTimeRequest.LogTimeRequestJF
+  domainFormat = EventTime.EventTimeJF
 ) with MetricsRepo {
 
-  private implicit val format = LogTimeRequest.LogTimeRequestJF
+  private implicit val format = EventTime.EventTimeJF
 
-  override def create(logTimeRequest: LogTimeRequest): Future[Boolean] = {
-    logger.debug(s"saving logTimeRequest: $logTimeRequest")
-    lazy val errorMsg = s"Log time request data not inserted for $logTimeRequest"
+  override def indexes: Seq[Index] = Seq(
+    Index(
+      //TODO check IndexType
+      key = Seq("conversationId" -> IndexType.Ascending),
+      name = Some("conversationId-Index"),
+      unique = true
+    )
+  )
 
-    collection.insert(logTimeRequest).map {
+
+  override def save(eventTime: EventTime): Future[Boolean] = {
+    logger.debug(s"saving eventTime: $eventTime")
+    lazy val errorMsg = s"Log time request data not inserted for $eventTime"
+
+    collection.insert(eventTime).map {
       writeResult => errorHandler.handleSaveError(writeResult, errorMsg)
     }
   }

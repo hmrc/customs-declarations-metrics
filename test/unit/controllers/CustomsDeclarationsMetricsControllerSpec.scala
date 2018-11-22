@@ -16,9 +16,10 @@
 
 package unit.controllers
 
-import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, Matchers}
+import play.api.i18n.MessagesApi
 import play.api.libs.json
 import play.api.libs.json.JsValue
 import play.api.mvc.{Request, Result}
@@ -28,7 +29,6 @@ import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 import util.MockitoPassByNameHelper.PassByNameVerifier
 import util.TestData._
@@ -42,7 +42,8 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
   trait SetUp {
     val mockLogger = mock[CdsLogger]
     val mockService = mock[MetricsService]
-    val controller = new CustomsDeclarationsMetricsController(mockLogger, mockService) {}
+    val mockMessagesApi = mock[MessagesApi](RETURNS_DEEP_STUBS)
+    val controller = new CustomsDeclarationsMetricsController(mockLogger, mockService, mockMessagesApi) {}
 
     def testSubmitResult(request: Request[Try[JsValue]])(test: Future[Result] => Unit) {
       test(controller.post().apply(request))
@@ -82,7 +83,7 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
 
     "handle invalid post to log-times endpoint and respond appropriately" in new SetUp() {
       testSubmitResult(InvalidRequestAsTryJsValue) { result =>
-        status(result) shouldBe INTERNAL_SERVER_ERROR
+        status(result) shouldBe BAD_REQUEST
       }
     }
 

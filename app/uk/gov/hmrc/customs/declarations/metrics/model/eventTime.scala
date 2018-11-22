@@ -21,6 +21,7 @@ import java.util.UUID
 
 import play.api.libs.json._
 
+//TODO consider converting to enum
 case class EventType(eventTypeString: String) extends AnyVal
 object EventType {
   implicit val eventTypeJF: Format[EventType] = new Format[EventType] {
@@ -59,9 +60,9 @@ object LogTimeStamp {
   }
 }
 
-case class LogTimeRequest(eventType: EventType, conversationId: ConversationId, logTimeStamp: LogTimeStamp)
+case class EventTime(eventType: EventType, conversationId: ConversationId, logTimeStamp: LogTimeStamp)
 
-object LogTimeRequest {
-  implicit val LogTimeRequestJF: OFormat[LogTimeRequest] = Json.format[LogTimeRequest]
+object EventTime {
+  implicit val EventTimeJF: OFormat[EventTime] = Json.format[EventTime]
 }
 

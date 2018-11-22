@@ -24,7 +24,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, AnyContentAsText, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ACCEPT, CONTENT_TYPE}
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, EventType, LogTimeRequest, LogTimeStamp}
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, EventType, EventTime, LogTimeStamp}
 
 import scala.util.Try
 
@@ -32,8 +32,18 @@ object TestData {
 
   val EventType1 = EventType("DEC-START")
   val ConversationId1 = ConversationId(UUID.fromString("dff783d7-44ee-4836-93d0-3242da7c225f"))
-  val LogTimeStamp1 = LogTimeStamp(LocalDateTime.now())
-  val LogTimeRequest1 = LogTimeRequest(EventType1, ConversationId1, LogTimeStamp1)
+  val LogTimeStamp1 = LogTimeStamp(LocalDateTime.now().minusMinutes(2))
+  val EventTime1 = EventTime(EventType1, ConversationId1, LogTimeStamp1)
+
+  val EventType2 = EventType("DEC-START")
+  val ConversationId2 = ConversationId(UUID.fromString("153d8350-10df-4bd7-b6ad-636450e7fda1"))
+  val LogTimeStamp2 = LogTimeStamp(LocalDateTime.now().minusMinutes(1))
+  val EventTime2 = EventTime(EventType2, ConversationId2, LogTimeStamp2)
+
+  val EventType3 = EventType("DEC-START")
+  val ConversationId3 = ConversationId(UUID.fromString("ebd5998d-f655-4a54-a309-c98ee18cf944"))
+  val LogTimeStamp3 = LogTimeStamp(LocalDateTime.now())
+  val EventTime3 = EventTime(EventType3, ConversationId3, LogTimeStamp3)
 
   val ValidJson: JsValue = Json.parse("""
        |{

@@ -19,15 +19,21 @@ package uk.gov.hmrc.customs.declarations.metrics.services
 import javax.inject.Inject
 
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.LogTimeRequest
+import uk.gov.hmrc.customs.declarations.metrics.model.EventTime
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 
 import scala.concurrent.Future
 
 class MetricsService @Inject()(cdsLogger: CdsLogger, metricsRepo: MetricsRepo) {
 
-  def process(logTimeRequest: LogTimeRequest): Future[Boolean] = {
-    metricsRepo.create(logTimeRequest)
+  def process(eventTime: EventTime): Future[Boolean] = {
+    metricsRepo.save(eventTime)
+
+    //switch on EventType
+
+    //dec_start => store graphite count & digital elapsed time
+
+    //cn => find (update?) mongo rec & calc elapsed time & store count & elapsed time
   }
 
 }
