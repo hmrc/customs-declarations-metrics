@@ -19,13 +19,14 @@ package uk.gov.hmrc.customs.declarations.metrics.services
 import java.time.Duration
 import javax.inject.Inject
 
+import com.kenshoo.play.metrics.Metrics
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{EventTime, EventTimeStamp, EventType}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 
 import scala.concurrent.Future
 
-class MetricsService @Inject()(cdsLogger: CdsLogger, metricsRepo: MetricsRepo) {
+class MetricsService @Inject()(cdsLogger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics) extends HasMetrics {
 
   def process(eventTime: EventTime): Future[Boolean] = {
     metricsRepo.save(eventTime)
@@ -37,18 +38,19 @@ class MetricsService @Inject()(cdsLogger: CdsLogger, metricsRepo: MetricsRepo) {
         metricsRepo.save(eventTime)
         //TODO fix naked get
         val duration = calculateElapsedTime(eventTime.eventStart, eventTime.eventEnd.get)
+        recordTime("declaration-digital", duration)
+        Future.successful(true)
         //graphite call
       case EventType("CN-START") =>
-        //cn => find (update?) mongo rec & calc elapsed time & store count & elapsed time
+        //cn => find & update mongo rec only where no cn previously received & calc elapsed time & store count & elapsed time
       ???
 
     }
 
   }
 
-
   def calculateElapsedTime(start: EventTimeStamp, end: EventTimeStamp): Duration = {
-    Duration.between(end.localDateTime, start.localDateTime)
+    Duration.between(start.localDateTime, end.localDateTime)
   }
 
 }
