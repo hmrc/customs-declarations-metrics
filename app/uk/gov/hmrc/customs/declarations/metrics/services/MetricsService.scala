@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.services
 
+import java.time.Duration
 import javax.inject.Inject
 
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.EventTime
+import uk.gov.hmrc.customs.declarations.metrics.model.{EventTime, EventTimeStamp, EventType}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 
 import scala.concurrent.Future
@@ -29,11 +30,25 @@ class MetricsService @Inject()(cdsLogger: CdsLogger, metricsRepo: MetricsRepo) {
   def process(eventTime: EventTime): Future[Boolean] = {
     metricsRepo.save(eventTime)
 
-    //switch on EventType
+    eventTime.eventType match {
+      case EventType("DEC-START") =>
+        //dec_start => store graphite count & calc elapsed time from two timestamps & store in Mongo
+        //TODO check boolean returned
+        metricsRepo.save(eventTime)
+        //TODO fix naked get
+        val duration = calculateElapsedTime(eventTime.eventStart, eventTime.eventEnd.get)
+        //graphite call
+      case EventType("CN-START") =>
+        //cn => find (update?) mongo rec & calc elapsed time & store count & elapsed time
+      ???
 
-    //dec_start => store graphite count & digital elapsed time
+    }
 
-    //cn => find (update?) mongo rec & calc elapsed time & store count & elapsed time
+  }
+
+
+  def calculateElapsedTime(start: EventTimeStamp, end: EventTimeStamp): Duration = {
+    Duration.between(end.localDateTime, start.localDateTime)
   }
 
 }

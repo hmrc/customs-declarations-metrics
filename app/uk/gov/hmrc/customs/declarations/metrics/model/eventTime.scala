@@ -46,21 +46,21 @@ object ConversationId {
   }
 }
 
-case class LogTimeStamp(localDateTime: LocalDateTime) extends AnyVal {
+case class EventTimeStamp(localDateTime: LocalDateTime) extends AnyVal {
   override def toString: String = localDateTime.toString
 }
 
-object LogTimeStamp {
-  implicit val logTimeStampJF: Format[LogTimeStamp] = new Format[LogTimeStamp] {
-    def writes(localDateTime: LogTimeStamp) = JsString(localDateTime.toString)
-    def reads(json: JsValue): JsResult[LogTimeStamp] = json match {
+object EventTimeStamp {
+  implicit val eventTimeStampJF: Format[EventTimeStamp] = new Format[EventTimeStamp] {
+    def writes(localDateTime: EventTimeStamp) = JsString(localDateTime.toString)
+    def reads(json: JsValue): JsResult[EventTimeStamp] = json match {
       case JsNull => JsError()
-      case _ => JsSuccess(LogTimeStamp(json.as[LocalDateTime]))
+      case _ => JsSuccess(EventTimeStamp(json.as[LocalDateTime]))
     }
   }
 }
 
-case class EventTime(eventType: EventType, conversationId: ConversationId, logTimeStamp: LogTimeStamp)
+case class EventTime(eventType: EventType, conversationId: ConversationId, eventStart: EventTimeStamp, eventEnd: Option[EventTimeStamp])
 
 object EventTime {
   implicit val EventTimeJF: OFormat[EventTime] = Json.format[EventTime]

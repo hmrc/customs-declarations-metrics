@@ -77,7 +77,7 @@ class MetricsMongoRepoSpec extends UnitSpec
   }
 
   "repository" should {
-    "successfully save a single event" in {
+    "successfully save a single event without end time" in {
       when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       val saveResult = await(repository.save(EventTime1))
       saveResult shouldBe true
@@ -86,6 +86,21 @@ class MetricsMongoRepoSpec extends UnitSpec
       val findResult = await(repository.collection.find(selector(ConversationId1)).one[EventTime]).get
       findResult.conversationId should not be None
       findResult.eventType should not be None
+      findResult.eventStart should not be None
+      findResult.eventEnd shouldBe None
+    }
+
+    "successfully save a single event with end time" in {
+      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
+      val saveResult = await(repository.save(EventTimeWithEndTime1))
+      saveResult shouldBe true
+      collectionSize shouldBe 1
+
+      val findResult = await(repository.collection.find(selector(ConversationId1)).one[EventTime]).get
+      findResult.conversationId should not be None
+      findResult.eventType should not be None
+      findResult.eventStart should not be None
+      findResult.eventEnd should not be None
     }
 
   }

@@ -75,13 +75,19 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
       }
     }
 
-    "handle valid post to log-times endpoint and respond appropriately" in new SetUp() {
+    "handle valid post to log-time endpoint and respond appropriately" in new SetUp() {
       testSubmitResult(ValidRequestAsTryJsValue) { result =>
         status(result) shouldBe ACCEPTED
       }
     }
 
-    "handle invalid post to log-times endpoint and respond appropriately" in new SetUp() {
+    "handle valid post without end time to log-time endpoint and respond appropriately" in new SetUp() {
+      testSubmitResult(ValidRequestWithoutEndTimeAsTryJsValue) { result =>
+        status(result) shouldBe ACCEPTED
+      }
+    }
+
+    "handle invalid post to log-time endpoint and respond appropriately" in new SetUp() {
       testSubmitResult(InvalidRequestAsTryJsValue) { result =>
         status(result) shouldBe BAD_REQUEST
       }
