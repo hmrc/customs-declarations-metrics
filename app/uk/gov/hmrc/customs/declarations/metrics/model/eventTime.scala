@@ -96,5 +96,5 @@ object ConversationMetrics {
   implicit val eventsReads: Reads[Seq[Event]] = Reads.seq(Event.eventReads)
   implicit val eventsWrites: Writes[Seq[Event]] = Writes.seq(Event.eventWrites)
 
-  implicit val conversationMetricJF = Json.format[ConversationMetrics]
+  implicit val conversationMetricsJF = Json.format[ConversationMetrics]
 }

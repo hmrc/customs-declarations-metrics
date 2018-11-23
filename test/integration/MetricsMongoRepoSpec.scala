@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import reactivemongo.api.DB
 import reactivemongo.play.json.JsObjectDocumentWriter
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, ConversationMetric, ConversationMetrics}
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, ConversationMetrics}
 import uk.gov.hmrc.customs.declarations.metrics.repo.{MetricsMongoRepo, MetricsRepoErrorHandler, MongoDbProvider}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.MongoSpecSupport
@@ -50,7 +50,6 @@ class MetricsMongoRepoSpec extends UnitSpec
   }
 
   private val repository = new MetricsMongoRepo(mongoDbProvider, mockErrorHandler, mockLogger)
-  private val repositoryWithOneMaxRecord = new MetricsMongoRepo(mongoDbProvider, mockErrorHandler, mockLogger)
 
   override def beforeEach() {
     await(repository.drop)
@@ -78,9 +77,9 @@ class MetricsMongoRepoSpec extends UnitSpec
 
   "repository" should {
 
-    "successfully save a single event with end time" in {
+    "successfully save a metric with a single declaration event" in {
       when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
-      val saveResult = await(repository.save(ConversationMetrics1))
+      val saveResult = await(repository.save(ConversationMetricsWithDeclarationEventOnly))
       saveResult shouldBe true
       collectionSize shouldBe 1
 
@@ -89,9 +88,20 @@ class MetricsMongoRepoSpec extends UnitSpec
       findResult.events.head.eventType should not be None
       findResult.events.head.eventStart should not be None
       findResult.events.head.eventEnd should not be None
-      findResult.events(1).eventType should not be None
-      findResult.events(1).eventStart should not be None
-      findResult.events(1).eventEnd should not be None
+    }
+
+    "successfully update existing metric with a notification event" in {
+      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
+      val saveResult = await(repository.save(ConversationMetricsWithDeclarationEventOnly))
+      saveResult shouldBe true
+      collectionSize shouldBe 1
+
+      await(repository.updateWithFirstNotification(NotificationConversationMetric))
+      collectionSize shouldBe 1
+
+      val findResult = await(repository.collection.find(selector(DeclarationConversationId)).one[ConversationMetrics]).get
+      findResult.events.size shouldBe 2
+      findResult.conversationId should not be None
     }
 
   }

@@ -21,29 +21,36 @@ import javax.inject.Inject
 
 import com.kenshoo.play.metrics.Metrics
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
+import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorInternalServerError
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, EventTimeStamp, EventType}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Left
 
 class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics) extends HasMetrics {
 
-  def process(conversationMetric: ConversationMetric): Future[Either[ErrorResponse, Boolean]] = {
+  def process(conversationMetric: ConversationMetric): Future[Either[ErrorResponse, Unit]] = {
 
     conversationMetric.event.eventType match {
       case EventType("DECLARATION") =>
         //DECLARATION => store in Mongo, calc elapsed time from two timestamps & store duration in graphite
-        //TODO check boolean returned
-        val success = metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event)))
-        recordTime("declaration-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
-        Future.successful(Right(true))
+        metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event))).map {
+          case true =>
+            recordTime("declaration-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
+            Right(())
+          case false => Left(ErrorInternalServerError)
+        }
 
-      case EventType("NOTIFICATION") =>
+      case EventType("DEC-NOTIFICATION") =>
         //NOTIFICATION => find & update mongo rec only where no cn previously received, calc round trip time & store duration in graphite
-
-      ???
-
+        metricsRepo.updateWithFirstNotification(conversationMetric).map { conversationMetric =>
+          //TODO replace timestamp extraction with reference to EventType, not position
+          recordTime("declaration-round-trip", calculateElapsedTime(conversationMetric.events.head.eventStart, conversationMetric.events(1).eventEnd))
+          Right(())
+        }
     }
 
   }
