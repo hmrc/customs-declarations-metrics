@@ -33,10 +33,8 @@ trait HasMetrics {
   def recordTime(timerName: Metric, duration: Duration): Unit = {
 
     registry.getTimers
-      .getOrDefault(s"$timerName-timer", registry.timer(s"$timerName-timer"))
+      .getOrDefault(timerName, registry.timer(timerName))
       .update(duration.toMillis, MILLISECONDS)
-
-    registry.counter(s"$timerName-count").inc()
   }
 
 }

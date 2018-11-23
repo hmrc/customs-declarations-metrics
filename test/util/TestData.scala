@@ -16,7 +16,7 @@
 
 package util
 
-import java.time.LocalDateTime
+import java.time._
 import java.util.UUID
 
 import play.api.http.MimeTypes
@@ -24,28 +24,23 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, AnyContentAsText, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ACCEPT, CONTENT_TYPE}
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, EventType, EventTime, EventTimeStamp}
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, EventTime, EventTimeStamp, EventType}
 
 import scala.util.Try
 
 object TestData {
 
-  val EventType1 = EventType("DEC-START")
+  val EventType1 = EventType("DECLARATION")
   val ConversationId1 = ConversationId(UUID.fromString("dff783d7-44ee-4836-93d0-3242da7c225f"))
-  val EventTimeStamp1 = EventTimeStamp(LocalDateTime.now().minusMinutes(2))
-  val EventTime1 = EventTime(EventType1, ConversationId1, EventTimeStamp1, None)
+  val EventTimeStampEntry1 = EventTimeStamp(OffsetDateTime.now(ZoneOffset.UTC).toZonedDateTime)
+  val EventTimeStampExit1 = EventTimeStamp(EventTimeStampEntry1.zonedDateTime.plusSeconds(2))
+  val EventTime1 = EventTime(EventType1, ConversationId1, EventTimeStampEntry1, EventTimeStampExit1)
 
-  val EventTimeWithEndTime1 = EventTime(EventType1, ConversationId1, EventTimeStamp1, Some(EventTimeStamp(EventTimeStamp1.localDateTime.plusSeconds(1))))
-
-  val EventType2 = EventType("DEC-START")
+  val EventType2 = EventType("DECLARATION")
   val ConversationId2 = ConversationId(UUID.fromString("153d8350-10df-4bd7-b6ad-636450e7fda1"))
-  val EventTimeStamp2 = EventTimeStamp(LocalDateTime.now().minusMinutes(1))
-  val EventTime2 = EventTime(EventType2, ConversationId2, EventTimeStamp2, None)
-
-  val EventType3 = EventType("DEC-START")
-  val ConversationId3 = ConversationId(UUID.fromString("ebd5998d-f655-4a54-a309-c98ee18cf944"))
-  val EventTimeStamp3 = EventTimeStamp(LocalDateTime.now())
-  val EventTime3 = EventTime(EventType3, ConversationId3, EventTimeStamp3, None)
+  val EventTimeStampEntry2 = EventTimeStamp(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(1).toZonedDateTime)
+  val EventTimeStampExit2 = EventTimeStamp(EventTimeStampEntry2.zonedDateTime.plusSeconds(4))
+  val EventTime2 = EventTime(EventType2, ConversationId2, EventTimeStampEntry2, EventTimeStampExit2)
 
   val ValidJson: JsValue = Json.parse("""
        |{
@@ -53,14 +48,6 @@ object TestData {
        | "conversationId": "dff783d7-44ee-4836-93d0-3242da7c225f",
        | "eventStart": "2014-10-23T00:35:14.123Z",
        | "eventEnd": "2014-10-23T00:36:14.123Z"
-       |}
-    """.stripMargin)
-
-  val ValidJsonWithoutEndTime: JsValue = Json.parse("""
-       |{
-       | "eventType": "DEC-START",
-       | "conversationId": "dff783d7-44ee-4836-93d0-3242da7c225f",
-       | "eventStart": "2014-10-23T00:35:14.123Z"
        |}
     """.stripMargin)
 
@@ -76,10 +63,6 @@ object TestData {
     .withHeaders(RequestHeaders.ValidHeaders.toSeq: _*)
     .withJsonBody(ValidJson)
 
-  val ValidRequestWithoutEndTime: FakeRequest[AnyContentAsJson] = FakeRequest("POST","/log-time")
-    .withHeaders(RequestHeaders.ValidHeaders.toSeq: _*)
-    .withJsonBody(ValidJsonWithoutEndTime)
-
   val InvalidRequest: FakeRequest[AnyContentAsJson] = FakeRequest("POST","/log-time")
     .withHeaders(RequestHeaders.ValidHeaders.toSeq: _*)
     .withJsonBody(InvalidJson)
@@ -91,7 +74,6 @@ object TestData {
     .withHeaders(RequestHeaders.CONTENT_TYPE_HEADER).withBody(Try(ValidJson))
 
   val ValidRequestAsTryJsValue: Request[Try[JsValue]] = ValidRequest.copyFakeRequest[Try[JsValue]](body = Try(ValidRequest.body.json))
-  val ValidRequestWithoutEndTimeAsTryJsValue: Request[Try[JsValue]] = ValidRequest.copyFakeRequest[Try[JsValue]](body = Try(ValidRequestWithoutEndTime.body.json))
   val InvalidRequestAsTryJsValue: Request[Try[JsValue]] = InvalidRequest.copyFakeRequest[Try[JsValue]](body = Try(InvalidRequest.body.json))
   val NonJsonPayloadRequest: FakeRequest[AnyContentAsText] = ValidRequest.withTextBody(NonJsonPayload)
 

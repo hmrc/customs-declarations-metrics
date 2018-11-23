@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.model
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.UUID
 
 import play.api.libs.json._
@@ -46,21 +46,21 @@ object ConversationId {
   }
 }
 
-case class EventTimeStamp(localDateTime: LocalDateTime) extends AnyVal {
-  override def toString: String = localDateTime.toString
+case class EventTimeStamp(zonedDateTime: ZonedDateTime) extends AnyVal {
+  override def toString: String = zonedDateTime.toString
 }
 
 object EventTimeStamp {
   implicit val eventTimeStampJF: Format[EventTimeStamp] = new Format[EventTimeStamp] {
-    def writes(localDateTime: EventTimeStamp) = JsString(localDateTime.toString)
+    def writes(zonedDateTime: EventTimeStamp) = JsString(zonedDateTime.toString)
     def reads(json: JsValue): JsResult[EventTimeStamp] = json match {
       case JsNull => JsError()
-      case _ => JsSuccess(EventTimeStamp(json.as[LocalDateTime]))
+      case _ => JsSuccess(EventTimeStamp(json.as[ZonedDateTime]))
     }
   }
 }
 
-case class EventTime(eventType: EventType, conversationId: ConversationId, eventStart: EventTimeStamp, eventEnd: Option[EventTimeStamp])
+case class EventTime(eventType: EventType, conversationId: ConversationId, eventStart: EventTimeStamp, eventEnd: EventTimeStamp)
 
 object EventTime {
   implicit val EventTimeJF: OFormat[EventTime] = Json.format[EventTime]

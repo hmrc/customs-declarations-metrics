@@ -20,28 +20,28 @@ import java.time.Duration
 import javax.inject.Inject
 
 import com.kenshoo.play.metrics.Metrics
+import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{EventTime, EventTimeStamp, EventType}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 
 import scala.concurrent.Future
 
-class MetricsService @Inject()(cdsLogger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics) extends HasMetrics {
+class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics) extends HasMetrics {
 
-  def process(eventTime: EventTime): Future[Boolean] = {
+  def process(eventTime: EventTime): Future[Either[ErrorResponse, Boolean]] = {
     metricsRepo.save(eventTime)
 
     eventTime.eventType match {
-      case EventType("DEC-START") =>
+      case EventType("DECLARATION") =>
         //dec_start => store graphite count & calc elapsed time from two timestamps & store in Mongo
         //TODO check boolean returned
-        metricsRepo.save(eventTime)
-        //TODO fix naked get
-        val duration = calculateElapsedTime(eventTime.eventStart, eventTime.eventEnd.get)
-        recordTime("declaration-digital", duration)
-        Future.successful(true)
-        //graphite call
-      case EventType("CN-START") =>
+        val success = metricsRepo.save(eventTime)
+        recordTime("declaration-digital", calculateElapsedTime(eventTime.eventStart, eventTime.eventEnd))
+
+        Future.successful(Right(true))
+
+      case EventType("NOTIFICATION") =>
         //cn => find & update mongo rec only where no cn previously received & calc elapsed time & store count & elapsed time
       ???
 
@@ -50,7 +50,7 @@ class MetricsService @Inject()(cdsLogger: CdsLogger, metricsRepo: MetricsRepo, v
   }
 
   def calculateElapsedTime(start: EventTimeStamp, end: EventTimeStamp): Duration = {
-    Duration.between(start.localDateTime, end.localDateTime)
+    Duration.between(start.zonedDateTime, end.zonedDateTime)
   }
 
 }
