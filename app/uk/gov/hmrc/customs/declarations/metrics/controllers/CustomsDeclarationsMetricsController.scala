@@ -25,7 +25,7 @@ import play.api.mvc.{Action, BodyParser}
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.errorBadRequest
 import uk.gov.hmrc.customs.api.common.controllers.{ErrorResponse, ResponseContents}
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.EventTime
+import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetric
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
@@ -49,7 +49,7 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
       request.body match {
 
         case Success(js) =>
-          js.validate[EventTime] match {
+          js.validate[ConversationMetric] match {
             case JsSuccess(requestPayload, _) =>
               logger.debug(s"Log-time endpoint called with payload $requestPayload and headers ${request.headers}")
               metricsService.process(requestPayload)

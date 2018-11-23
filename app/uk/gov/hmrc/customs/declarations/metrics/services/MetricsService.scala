@@ -22,27 +22,27 @@ import javax.inject.Inject
 import com.kenshoo.play.metrics.Metrics
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{EventTime, EventTimeStamp, EventType}
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, EventTimeStamp, EventType}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 
 import scala.concurrent.Future
 
 class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics) extends HasMetrics {
 
-  def process(eventTime: EventTime): Future[Either[ErrorResponse, Boolean]] = {
-    metricsRepo.save(eventTime)
+  def process(conversationMetric: ConversationMetric): Future[Either[ErrorResponse, Boolean]] = {
 
-    eventTime.eventType match {
+    conversationMetric.event.eventType match {
       case EventType("DECLARATION") =>
-        //dec_start => store graphite count & calc elapsed time from two timestamps & store in Mongo
+        //DECLARATION => store in Mongo, calc elapsed time from two timestamps & store duration in graphite
         //TODO check boolean returned
-        val success = metricsRepo.save(eventTime)
-        recordTime("declaration-digital", calculateElapsedTime(eventTime.eventStart, eventTime.eventEnd))
-
+        val success = metricsRepo.save(conversationMetric)
+        recordTime("declaration-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
         Future.successful(Right(true))
 
       case EventType("NOTIFICATION") =>
-        //cn => find & update mongo rec only where no cn previously received & calc elapsed time & store count & elapsed time
+        //NOTIFICATION => find & update mongo rec only where no cn previously received, calc round trip time & store duration in graphite
+
+
       ???
 
     }

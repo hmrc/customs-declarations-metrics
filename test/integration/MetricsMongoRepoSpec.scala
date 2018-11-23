@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import reactivemongo.api.DB
 import reactivemongo.play.json.JsObjectDocumentWriter
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, EventTime}
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, ConversationMetric, ConversationMetrics}
 import uk.gov.hmrc.customs.declarations.metrics.repo.{MetricsMongoRepo, MetricsRepoErrorHandler, MongoDbProvider}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.MongoSpecSupport
@@ -80,15 +80,18 @@ class MetricsMongoRepoSpec extends UnitSpec
 
     "successfully save a single event with end time" in {
       when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
-      val saveResult = await(repository.save(EventTime1))
+      val saveResult = await(repository.save(ConversationMetrics1))
       saveResult shouldBe true
       collectionSize shouldBe 1
 
-      val findResult = await(repository.collection.find(selector(ConversationId1)).one[EventTime]).get
+      val findResult = await(repository.collection.find(selector(DeclarationConversationId)).one[ConversationMetrics]).get
       findResult.conversationId should not be None
-      findResult.eventType should not be None
-      findResult.eventStart should not be None
-      findResult.eventEnd should not be None
+      findResult.events.head.eventType should not be None
+      findResult.events.head.eventStart should not be None
+      findResult.events.head.eventEnd should not be None
+      findResult.events(1).eventType should not be None
+      findResult.events(1).eventStart should not be None
+      findResult.events(1).eventEnd should not be None
     }
 
   }

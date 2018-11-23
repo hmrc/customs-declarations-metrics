@@ -22,7 +22,7 @@ import com.google.inject.ImplementedBy
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.EventTime
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics}
 import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,20 +31,20 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[MetricsMongoRepo])
 trait MetricsRepo {
 
-  def save(eventTime: EventTime): Future[Boolean]
-
+  def save(eventTime: ConversationMetrics): Future[Boolean]
+//  def updateWithFirstNotification(eventTime: ConversationMetric): Future[Boolean]
 }
 
 
 class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
                                   errorHandler: MetricsRepoErrorHandler,
-                                  logger: CdsLogger) extends ReactiveRepository[EventTime, BSONObjectID](
+                                  logger: CdsLogger) extends ReactiveRepository[ConversationMetrics, BSONObjectID](
   collectionName = "logTimes",
   mongo = mongoDbProvider.mongo,
-  domainFormat = EventTime.EventTimeJF
+  domainFormat = ConversationMetrics.conversationMetricsJF
 ) with MetricsRepo {
 
-  private implicit val format = EventTime.EventTimeJF
+  private implicit val format = ConversationMetrics.conversationMetricsJF
 
   override def indexes: Seq[Index] = Seq(
     Index(
@@ -55,12 +55,11 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
     )
   )
 
+  override def save(conversationMetrics: ConversationMetrics): Future[Boolean] = {
+    logger.debug(s"saving eventTime: $conversationMetrics")
+    lazy val errorMsg = s"Log time request data not inserted for $conversationMetrics"
 
-  override def save(eventTime: EventTime): Future[Boolean] = {
-    logger.debug(s"saving eventTime: $eventTime")
-    lazy val errorMsg = s"Log time request data not inserted for $eventTime"
-
-    collection.insert(eventTime).map {
+    collection.insert(conversationMetrics).map {
       writeResult => errorHandler.handleSaveError(writeResult, errorMsg)
     }
   }

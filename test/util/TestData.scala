@@ -24,27 +24,31 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, AnyContentAsText, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ACCEPT, CONTENT_TYPE}
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, EventTime, EventTimeStamp, EventType}
+import uk.gov.hmrc.customs.declarations.metrics.model._
 
 import scala.util.Try
 
 object TestData {
 
-  val EventType1 = EventType("DECLARATION")
-  val ConversationId1 = ConversationId(UUID.fromString("dff783d7-44ee-4836-93d0-3242da7c225f"))
-  val EventTimeStampEntry1 = EventTimeStamp(OffsetDateTime.now(ZoneOffset.UTC).toZonedDateTime)
-  val EventTimeStampExit1 = EventTimeStamp(EventTimeStampEntry1.zonedDateTime.plusSeconds(2))
-  val EventTime1 = EventTime(EventType1, ConversationId1, EventTimeStampEntry1, EventTimeStampExit1)
+  val DeclarationEventType = EventType("DECLARATION")
+  val DeclarationConversationId = ConversationId(UUID.fromString("dff783d7-44ee-4836-93d0-3242da7c225f"))
+  val DeclarationEventTimeStampEntry = EventTimeStamp(OffsetDateTime.now(ZoneOffset.UTC).toZonedDateTime)
+  val DeclarationEventTimeStampExit = EventTimeStamp(DeclarationEventTimeStampEntry.zonedDateTime.plusSeconds(2))
+  val DeclarationEvent = Event(DeclarationEventType, DeclarationEventTimeStampEntry, DeclarationEventTimeStampExit)
+  val DeclarationConversationMetric = ConversationMetric(DeclarationConversationId, DeclarationEvent)
 
-  val EventType2 = EventType("DECLARATION")
-  val ConversationId2 = ConversationId(UUID.fromString("153d8350-10df-4bd7-b6ad-636450e7fda1"))
-  val EventTimeStampEntry2 = EventTimeStamp(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(1).toZonedDateTime)
-  val EventTimeStampExit2 = EventTimeStamp(EventTimeStampEntry2.zonedDateTime.plusSeconds(4))
-  val EventTime2 = EventTime(EventType2, ConversationId2, EventTimeStampEntry2, EventTimeStampExit2)
+  val NotificationEventType = EventType("NOTIFICATION")
+  val NotificationConversationId = ConversationId(UUID.fromString("153d8350-10df-4bd7-b6ad-636450e7fda1"))
+  val NotificationEventTimeStampEntry = EventTimeStamp(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(1).toZonedDateTime)
+  val NotificationEventTimeStampExit = EventTimeStamp(NotificationEventTimeStampEntry.zonedDateTime.plusSeconds(4))
+  val NotificationEvent = Event(NotificationEventType, NotificationEventTimeStampEntry, NotificationEventTimeStampExit)
+  val NotificationConversationMetric = ConversationMetric(NotificationConversationId, NotificationEvent)
+
+  val ConversationMetrics1 = ConversationMetrics(DeclarationConversationId, Seq(DeclarationEvent, NotificationEvent))
 
   val ValidJson: JsValue = Json.parse("""
        |{
-       | "eventType": "DEC-START",
+       | "eventType": "DECLARATION",
        | "conversationId": "dff783d7-44ee-4836-93d0-3242da7c225f",
        | "eventStart": "2014-10-23T00:35:14.123Z",
        | "eventEnd": "2014-10-23T00:36:14.123Z"
@@ -53,7 +57,7 @@ object TestData {
 
   val InvalidJson: JsValue = Json.parse("""
        |{
-       | "eventType": "DEC-START"
+       | "eventType": "DECLARATION"
        |}
     """.stripMargin)
 

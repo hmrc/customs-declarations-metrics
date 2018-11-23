@@ -20,6 +20,8 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 import play.api.libs.json._
+//import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
 
 //TODO consider converting to enum
 case class EventType(eventTypeString: String) extends AnyVal
@@ -60,9 +62,44 @@ object EventTimeStamp {
   }
 }
 
-case class EventTime(eventType: EventType, conversationId: ConversationId, eventStart: EventTimeStamp, eventEnd: EventTimeStamp)
+case class Event(eventType: EventType, eventStart: EventTimeStamp, eventEnd: EventTimeStamp)
+object Event {
+  implicit val eventReads: Reads[Event] = (
+    (JsPath \ "eventType").read[EventType] and
+    (JsPath \ "eventStart").read[EventTimeStamp] and
+    (JsPath \ "eventEnd").read[EventTimeStamp]) (Event.apply _)
+  implicit val eventWrites: OWrites[Event] = (
+    (JsPath \ "eventType").write[EventType] and
+    (JsPath \ "eventStart").write[EventTimeStamp] and
+    (JsPath \ "eventEnd").write[EventTimeStamp]) (unlift(Event.unapply))
 
-object EventTime {
-  implicit val EventTimeJF: OFormat[EventTime] = Json.format[EventTime]
+  implicit val EventJF: Format[Event] = Format(eventReads, eventWrites)
 }
 
+case class ConversationMetric(conversationId: ConversationId, event: Event)
+object ConversationMetric {
+  implicit val conversationMetricReads: Reads[ConversationMetric] = (
+    (JsPath \ "conversationId").read[ConversationId] and
+    Event.eventReads
+  )(ConversationMetric.apply _)
+
+  implicit val conversationMetricWrites: OWrites[ConversationMetric] =(
+    (JsPath \ "conversationId").write[ConversationId] and
+    Event.eventWrites) (unlift(ConversationMetric.unapply))
+
+  implicit val conversationMetricJF: Format[ConversationMetric] = Format(conversationMetricReads, conversationMetricWrites)
+
+}
+
+case class ConversationMetrics(conversationId: ConversationId, events: Seq[Event])
+object ConversationMetrics {
+  implicit val conversationMetricsReads: Reads[ConversationMetrics] = (
+    (JsPath \ "conversationId").read[ConversationId] and
+      Json.reads[List[Event]]
+    )(ConversationMetrics.apply _)
+
+  implicit val conversationMetricsWrites: OWrites[ConversationMetrics] = (
+    (JsPath \ "conversationId").write[ConversationId] and
+      Json.writes[List[Event]]) (unlift(ConversationMetrics.unapply))
+  implicit val conversationMetricsJF: OFormat[ConversationMetrics] = Json.format[ConversationMetrics]
+}
