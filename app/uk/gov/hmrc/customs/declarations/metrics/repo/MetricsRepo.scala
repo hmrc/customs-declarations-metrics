@@ -22,7 +22,7 @@ import com.google.inject.ImplementedBy
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics}
+import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetrics
 import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -41,10 +41,10 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
                                   logger: CdsLogger) extends ReactiveRepository[ConversationMetrics, BSONObjectID](
   collectionName = "logTimes",
   mongo = mongoDbProvider.mongo,
-  domainFormat = ConversationMetrics.conversationMetricsJF
+  domainFormat = ConversationMetrics.conversationMetricJF
 ) with MetricsRepo {
 
-  private implicit val format = ConversationMetrics.conversationMetricsJF
+  private implicit val format = ConversationMetrics.conversationMetricJF
 
   override def indexes: Seq[Index] = Seq(
     Index(

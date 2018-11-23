@@ -20,9 +20,9 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 import play.api.libs.json._
-//import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
+//TODO consider simplifying some of the serialisation below
 //TODO consider converting to enum
 case class EventType(eventTypeString: String) extends AnyVal
 object EventType {
@@ -93,13 +93,8 @@ object ConversationMetric {
 
 case class ConversationMetrics(conversationId: ConversationId, events: Seq[Event])
 object ConversationMetrics {
-  implicit val conversationMetricsReads: Reads[ConversationMetrics] = (
-    (JsPath \ "conversationId").read[ConversationId] and
-      Json.reads[List[Event]]
-    )(ConversationMetrics.apply _)
+  implicit val eventsReads: Reads[Seq[Event]] = Reads.seq(Event.eventReads)
+  implicit val eventsWrites: Writes[Seq[Event]] = Writes.seq(Event.eventWrites)
 
-  implicit val conversationMetricsWrites: OWrites[ConversationMetrics] = (
-    (JsPath \ "conversationId").write[ConversationId] and
-      Json.writes[List[Event]]) (unlift(ConversationMetrics.unapply))
-  implicit val conversationMetricsJF: OFormat[ConversationMetrics] = Json.format[ConversationMetrics]
+  implicit val conversationMetricJF = Json.format[ConversationMetrics]
 }

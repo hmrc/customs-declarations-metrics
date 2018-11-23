@@ -35,13 +35,12 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
       case EventType("DECLARATION") =>
         //DECLARATION => store in Mongo, calc elapsed time from two timestamps & store duration in graphite
         //TODO check boolean returned
-        val success = metricsRepo.save(conversationMetric)
+        val success = metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event)))
         recordTime("declaration-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
         Future.successful(Right(true))
 
       case EventType("NOTIFICATION") =>
         //NOTIFICATION => find & update mongo rec only where no cn previously received, calc round trip time & store duration in graphite
-
 
       ???
 
