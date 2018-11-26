@@ -16,7 +16,6 @@
 
 package component
 
-import org.scalatest.concurrent.Eventually
 import org.scalatest.{Matchers, OptionValues, _}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
@@ -27,44 +26,32 @@ import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetrics
 import uk.gov.hmrc.customs.declarations.metrics.repo.MongoDbProvider
 import uk.gov.hmrc.mongo.{Awaiting, MongoSpecSupport, ReactiveRepository}
-import util.TestData.{ValidRequest, InvalidDateTimeStampRequest}
+import util.TestData.{InvalidDateTimeStampRequest, ValidRequest}
 
 import scala.concurrent.Future
 
-class MetricsSpec extends FeatureSpec with GivenWhenThen with GuiceOneAppPerSuite
-  with BeforeAndAfterAll with BeforeAndAfterEach with Eventually with Matchers with OptionValues
-  with MongoSpecSupport with Awaiting{
-
-//  private val Wait = 5
-//
-//  override implicit def patienceConfig: PatienceConfig = super.patienceConfig.copy(timeout = Span(Wait, Seconds))
-
-  private val endpoint = "/log-times"
+class MetricsSpec extends FeatureSpec
+  with GivenWhenThen
+  with GuiceOneAppPerSuite
+  with BeforeAndAfterEach
+  with Matchers
+  with OptionValues
+  with MongoSpecSupport
+  with Awaiting {
 
   val repo = new ReactiveRepository[ConversationMetrics, BSONObjectID](
-    //TODO rename repo collection
-    collectionName = "logTimes",
+    collectionName = "metrics",
     mongo = app.injector.instanceOf[MongoDbProvider].mongo,
     domainFormat = ConversationMetrics.conversationMetricsJF) {  }
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder().build()
 
-  override protected def beforeAll() {
-    await(repo.drop)
-   // startMockServer()
-  }
-
-  override protected def afterAll() {
-    //stopMockServer()
+  override protected def beforeEach() {
     await(repo.drop)
   }
 
-  override protected def afterEach(): Unit = {
-   // resetMockServer()
-  }
-
-  override protected def beforeEach(): Unit = {
-
+  override protected def afterEach() {
+    await(repo.drop)
   }
 
   feature("Record time stamps in metrics service") {

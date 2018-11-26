@@ -33,12 +33,9 @@ import scala.util.Left
 
 class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics) extends HasMetrics {
 
-  def validatePayload(conversationMetric: ConversationMetric): Boolean = {
-    conversationMetric.event.eventStart.zonedDateTime.isBefore(conversationMetric.event.eventEnd.zonedDateTime)
-  }
-
   def process(conversationMetric: ConversationMetric): Future[Either[Result, Unit]] = {
-    logger.debug(s"received conversation metric $")
+
+    logger.debug(s"received conversation metric $conversationMetric")
     validatePayload(conversationMetric) match {
       case true =>
         conversationMetric.event.eventType match {
@@ -60,6 +57,10 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
       case false =>
         Future.successful(Left(ErrorResponse.errorBadRequest("Start date time must be before end date time").JsonResult))
     }
+  }
+
+  private def validatePayload(conversationMetric: ConversationMetric): Boolean = {
+    conversationMetric.event.eventStart.zonedDateTime.isBefore(conversationMetric.event.eventEnd.zonedDateTime)
   }
 
   private def calculateElapsedTime(start: EventTimeStamp, end: EventTimeStamp): Duration = {
