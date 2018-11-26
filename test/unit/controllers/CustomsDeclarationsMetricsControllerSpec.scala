@@ -37,7 +37,7 @@ import scala.concurrent.Future
 import scala.util.Try
 
 class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
-  with Matchers with MockitoSugar with BeforeAndAfterEach {
+  with Matchers with MockitoSugar {
 
   trait SetUp {
     val mockLogger = mock[CdsLogger]

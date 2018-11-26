@@ -53,7 +53,7 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
 
   }
 
-  def calculateElapsedTime(start: EventTimeStamp, end: EventTimeStamp): Duration = {
+  private def calculateElapsedTime(start: EventTimeStamp, end: EventTimeStamp): Duration = {
     Duration.between(start.zonedDateTime, end.zonedDateTime)
   }
 
