@@ -19,8 +19,9 @@ package uk.gov.hmrc.customs.declarations.metrics.services
 import java.time.Duration
 
 import com.kenshoo.play.metrics.Metrics
-
 import java.util.concurrent.TimeUnit.MILLISECONDS
+
+import com.codahale.metrics.MetricRegistry
 
 trait HasMetrics {
   
@@ -28,7 +29,7 @@ trait HasMetrics {
 
   def metrics: Metrics
 
-  lazy val registry = metrics.defaultRegistry
+  lazy val registry: MetricRegistry = metrics.defaultRegistry
 
   def recordTime(timerName: Metric, duration: Duration): Unit = {
 

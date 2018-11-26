@@ -23,7 +23,6 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 //TODO consider simplifying some of the serialisation below
-//TODO consider converting to enum
 case class EventType(eventTypeString: String) extends AnyVal
 object EventType {
   implicit val eventTypeJF: Format[EventType] = new Format[EventType] {
@@ -96,5 +95,5 @@ object ConversationMetrics {
   implicit val eventsReads: Reads[Seq[Event]] = Reads.seq(Event.eventReads)
   implicit val eventsWrites: Writes[Seq[Event]] = Writes.seq(Event.eventWrites)
 
-  implicit val conversationMetricsJF = Json.format[ConversationMetrics]
+  implicit val conversationMetricsJF: OFormat[ConversationMetrics] = Json.format[ConversationMetrics]
 }

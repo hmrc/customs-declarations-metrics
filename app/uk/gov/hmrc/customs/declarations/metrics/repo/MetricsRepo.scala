@@ -17,9 +17,8 @@
 package uk.gov.hmrc.customs.declarations.metrics.repo
 
 import javax.inject.Inject
-
 import com.google.inject.ImplementedBy
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json, OFormat}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.JsObjectDocumentWriter
@@ -46,8 +45,8 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
   domainFormat = ConversationMetrics.conversationMetricsJF
 ) with MetricsRepo {
 
-  private implicit val format = ConversationMetrics.conversationMetricsJF
-  private implicit val formatEvent = Event.EventJF
+  private implicit val format: OFormat[ConversationMetrics] = ConversationMetrics.conversationMetricsJF
+  private implicit val formatEvent: Format[Event] = Event.EventJF
 
   override def indexes: Seq[Index] = Seq(
     Index(
@@ -79,5 +78,7 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
     }
     result
   }
+
+  //TODO need test for INDEX
 
 }

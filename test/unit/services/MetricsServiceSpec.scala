@@ -19,7 +19,7 @@ package unit.services
 
 import java.time.Duration
 
-import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.{Metric, MetricRegistry}
 import com.kenshoo.play.metrics.Metrics
 import org.mockito.Mockito.{RETURNS_DEEP_STUBS, verify, when}
 import org.mockito.ArgumentMatchers.any
@@ -29,14 +29,22 @@ import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorInternalSer
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
-import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
+import uk.gov.hmrc.customs.declarations.metrics.services.{HasMetrics, MetricsService}
 import uk.gov.hmrc.play.test.UnitSpec
-import util.TestData.{DeclarationConversationMetric, ConversationMetrics1, NotificationConversationMetric}
+import util.TestData.{ConversationMetrics1, DeclarationConversationMetric, NotificationConversationMetric}
 
 import scala.concurrent.Future
 
 class MetricsServiceSpec extends UnitSpec
   with Matchers with MockitoSugar {
+
+  trait FakeHasMetrics extends HasMetrics{
+   var recordTimeArgumentCaptor = Map[String, Duration]()
+    override lazy val registry: MetricRegistry = mock[MetricRegistry]
+    override def recordTime(timerName: Metric, duration: Duration): Unit = {
+      recordTimeArgumentCaptor = Map(timerName -> duration)
+    }
+  }
 
   trait SetUp {
     val mockMetrics = mock[Metrics]
@@ -44,14 +52,10 @@ class MetricsServiceSpec extends UnitSpec
     val mockRepo = mock[MetricsRepo]
     val mockMetricsRegistry = mock[MetricRegistry](RETURNS_DEEP_STUBS)
 
-    when(mockMetrics.defaultRegistry).thenReturn(mockMetricsRegistry)
-    val service = new MetricsService(mockLogger, mockRepo, mockMetrics){
-      override lazy val registry: MetricRegistry = mock[MetricRegistry]
-      override def recordTime(timerName: Metric, duration: Duration): Unit = {
-        ()
-      }
 
-    }
+
+    when(mockMetrics.defaultRegistry).thenReturn(mockMetricsRegistry)
+    val service = new MetricsService(mockLogger, mockRepo, mockMetrics) with FakeHasMetrics
   }
 
   "MetricsService" should {
@@ -77,8 +81,11 @@ class MetricsServiceSpec extends UnitSpec
     "save a notification metric successfully" in new SetUp() {
       when(mockRepo.updateWithFirstNotification(any[ConversationMetric])).thenReturn(Future.successful(ConversationMetrics1))
 
-      val result = service.process(NotificationConversationMetric)
-
+      val result = await(service.process(NotificationConversationMetric))
+      service.recordTimeArgumentCaptor.size shouldBe 1
+      service.recordTimeArgumentCaptor.head._1 shouldBe "EventType(DECLARATION)-round-trip"
+      service.recordTimeArgumentCaptor.head._2 shouldBe Duration.between(DeclarationConversationMetric.event.eventStart.zonedDateTime,
+                                                                          NotificationConversationMetric.event.eventEnd.zonedDateTime)
       verify(mockRepo).updateWithFirstNotification(any[ConversationMetric])
       await(result) shouldBe Right(())
     }

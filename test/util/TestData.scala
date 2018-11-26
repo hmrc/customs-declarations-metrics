@@ -65,11 +65,11 @@ object TestData {
 
   val NonJsonPayload: String = "This is a non-json payload"
 
-  val ValidRequest: FakeRequest[AnyContentAsJson] = FakeRequest("POST","/log-time")
+  val ValidRequest: FakeRequest[AnyContentAsJson] = FakeRequest("POST","/log-times")
     .withHeaders(RequestHeaders.ValidHeaders.toSeq: _*)
     .withJsonBody(ValidJson)
 
-  val InvalidRequest: FakeRequest[AnyContentAsJson] = FakeRequest("POST","/log-time")
+  val InvalidRequest: FakeRequest[AnyContentAsJson] = FakeRequest("POST","/log-times")
     .withHeaders(RequestHeaders.ValidHeaders.toSeq: _*)
     .withJsonBody(InvalidJson)
 
