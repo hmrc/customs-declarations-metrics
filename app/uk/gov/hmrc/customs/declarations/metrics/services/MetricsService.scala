@@ -49,7 +49,6 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
             Right(())
           case false => Left(ErrorInternalServerError)
         }
-
     }
 
   }

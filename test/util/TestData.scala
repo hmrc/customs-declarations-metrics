@@ -32,14 +32,14 @@ object TestData {
 
   val DeclarationEventType = EventType("DECLARATION")
   val DeclarationConversationId = ConversationId(UUID.fromString("dff783d7-44ee-4836-93d0-3242da7c225f"))
-  val DeclarationEventTimeStampEntry = EventTimeStamp(OffsetDateTime.now(ZoneOffset.UTC).toZonedDateTime)
+  val DeclarationEventTimeStampEntry = EventTimeStamp(ZonedDateTime.parse("2014-10-23T00:35:14.123Z"))
   val DeclarationEventTimeStampExit = EventTimeStamp(DeclarationEventTimeStampEntry.zonedDateTime.plusSeconds(2))
   val DeclarationEvent = Event(DeclarationEventType, DeclarationEventTimeStampEntry, DeclarationEventTimeStampExit)
   val DeclarationConversationMetric = ConversationMetric(DeclarationConversationId, DeclarationEvent)
 
   val NotificationEventType = EventType("NOTIFICATION")
   val NotificationConversationId = ConversationId(UUID.fromString("153d8350-10df-4bd7-b6ad-636450e7fda1"))
-  val NotificationEventTimeStampEntry = EventTimeStamp(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(1).toZonedDateTime)
+  val NotificationEventTimeStampEntry = EventTimeStamp(ZonedDateTime.parse("2014-10-23T00:36:14.123Z"))
   val NotificationEventTimeStampExit = EventTimeStamp(NotificationEventTimeStampEntry.zonedDateTime.plusSeconds(4))
   val NotificationEvent = Event(NotificationEventType, NotificationEventTimeStampEntry, NotificationEventTimeStampExit)
   val NotificationConversationMetric = ConversationMetric(DeclarationConversationId, NotificationEvent)

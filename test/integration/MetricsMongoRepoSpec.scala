@@ -106,5 +106,34 @@ class MetricsMongoRepoSpec extends UnitSpec
       findResult.events(1).eventType.eventTypeString shouldBe "NOTIFICATION"
     }
 
+    "no update for notification when declaration not found" in {
+      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
+      val caught = intercept[IllegalStateException](await(repository.updateWithFirstNotification(NotificationConversationMetric)))
+
+      caught.getMessage shouldBe "event data not inserted for ConversationMetric(dff783d7-44ee-4836-93d0-3242da7c225f,Event(EventType(NOTIFICATION),2014-10-23T00:36:14.123Z,2014-10-23T00:36:18.123Z))"
+      collectionSize shouldBe 0
+    }
+
+    "no update when notification metric already present" in {
+      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
+      await(repository.save(ConversationMetricsWithDeclarationEventOnly))
+      await(repository.updateWithFirstNotification(NotificationConversationMetric))
+
+      val caught = intercept[IllegalStateException](await(repository.updateWithFirstNotification(NotificationConversationMetric)))
+      caught.getMessage shouldBe "event data not inserted for ConversationMetric(dff783d7-44ee-4836-93d0-3242da7c225f,Event(EventType(NOTIFICATION),2014-10-23T00:36:14.123Z,2014-10-23T00:36:18.123Z))"
+    }
+
+    "no update when second notification stored" in {
+      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
+      await(repository.save(ConversationMetricsWithDeclarationEventOnly))
+      await(repository.updateWithFirstNotification(NotificationConversationMetric))
+
+      val caught = intercept[IllegalStateException](await(repository.updateWithFirstNotification(NotificationConversationMetric)))
+      caught.getMessage shouldBe "event data not inserted for ConversationMetric(dff783d7-44ee-4836-93d0-3242da7c225f,Event(EventType(NOTIFICATION),2014-10-23T00:36:14.123Z,2014-10-23T00:36:18.123Z))"
+      collectionSize shouldBe 1
+      val findResult = await(repository.collection.find(selector(DeclarationConversationId)).one[ConversationMetrics]).get
+      findResult.events.size shouldBe 2
+    }
+
   }
 }

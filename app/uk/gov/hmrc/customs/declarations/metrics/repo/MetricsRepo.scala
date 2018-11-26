@@ -71,8 +71,7 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
     logger.debug(s"updating with first notification: $conversationMetric")
     lazy val errorMsg = s"event data not inserted for $conversationMetric"
 
-    //TODO add criteria to selector so that update is only done when metric contains Declaration event only
-    val selector = Json.obj("conversationId" -> conversationMetric.conversationId.id)
+    val selector = Json.obj("conversationId" -> conversationMetric.conversationId.id, "events.1" -> Json.obj("$exists" -> false))
     val update = Json.obj("$push" -> Json.obj("events" -> conversationMetric.event))
 
     val result: Future[ConversationMetrics] = collection.findAndUpdate(selector, update).map { result =>
