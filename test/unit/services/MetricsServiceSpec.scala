@@ -75,7 +75,7 @@ class MetricsServiceSpec extends UnitSpec
       val result = service.process(DeclarationConversationMetric)
 
       verify(mockRepo).save(any[ConversationMetrics])
-      await(result) shouldBe Left(ErrorInternalServerError)
+      await(result) shouldBe Left(ErrorInternalServerError.JsonResult)
     }
 
     "save a notification metric successfully" in new SetUp() {

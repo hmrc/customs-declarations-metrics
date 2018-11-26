@@ -27,7 +27,7 @@ import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetrics
 import uk.gov.hmrc.customs.declarations.metrics.repo.MongoDbProvider
 import uk.gov.hmrc.mongo.{Awaiting, MongoSpecSupport, ReactiveRepository}
-import util.TestData.ValidRequest
+import util.TestData.{ValidRequest, InvalidDateTimeStampRequest}
 
 import scala.concurrent.Future
 
@@ -47,12 +47,7 @@ class MetricsSpec extends FeatureSpec with GivenWhenThen with GuiceOneAppPerSuit
     mongo = app.injector.instanceOf[MongoDbProvider].mongo,
     domainFormat = ConversationMetrics.conversationMetricsJF) {  }
 
-  val acceptanceTestConfigs: Map[String, Any] = Map(
-    "auditing.enabled" -> false,
-    "mongodb.uri" -> "mongodb://localhost:27017/customs-declarations-metrics"
-  )
-
-  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(acceptanceTestConfigs).build()
+  override implicit lazy val app: Application = new GuiceApplicationBuilder().build()
 
   override protected def beforeAll() {
     await(repo.drop)
@@ -74,22 +69,41 @@ class MetricsSpec extends FeatureSpec with GivenWhenThen with GuiceOneAppPerSuit
 
   feature("Record time stamps in metrics service") {
 
-//    scenario("Declaration Metric is received") {
-//
-//      Given("the API is available")
-//
-//      When("a POST request with data is sent to the API")
-//      val result = route(app, ValidRequest)
-//
-//      Then("a response with a 202 status is received")
-//      result shouldBe 'defined
-//      val resultFuture: Future[Result] = result.value
-//
-//      status(resultFuture) shouldBe ACCEPTED
-//
-//      And("the response body is empty")
-//      contentAsString(resultFuture) shouldBe 'empty
-//    }
+    scenario("Valid Declaration Metric is received") {
+
+      Given("the API is available")
+
+      When("a POST request with data is sent to the API")
+      val result = route(app, ValidRequest)
+
+      Then("a response with a 202 status is received")
+      result shouldBe 'defined
+      val resultFuture: Future[Result] = result.value
+
+      status(resultFuture) shouldBe ACCEPTED
+
+      And("the response body is empty")
+      contentAsString(resultFuture) shouldBe 'empty
+    }
+
+
+    scenario("invalid Declaration Metric is received") {
+
+      Given("the API is available")
+
+      When("a POST request with data is sent to the API")
+      val result = route(app, InvalidDateTimeStampRequest)
+
+      Then("a response with a 400 status is received")
+      result shouldBe 'defined
+      val resultFuture: Future[Result] = result.value
+
+      status(resultFuture) shouldBe BAD_REQUEST
+
+      And("the response body contains the error")
+      contentAsString(resultFuture) shouldBe """{"code":"BAD_REQUEST","message":"Start date time must be before end date time"}"""
+    }
+
   }
 
 }

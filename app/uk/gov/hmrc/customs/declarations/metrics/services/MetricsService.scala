@@ -17,9 +17,10 @@
 package uk.gov.hmrc.customs.declarations.metrics.services
 
 import java.time.Duration
-import javax.inject.Inject
 
+import javax.inject.Inject
 import com.kenshoo.play.metrics.Metrics
+import play.api.mvc.Result
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorInternalServerError
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
@@ -32,25 +33,33 @@ import scala.util.Left
 
 class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics) extends HasMetrics {
 
-  def process(conversationMetric: ConversationMetric): Future[Either[ErrorResponse, Unit]] = {
+  def validatePayload(conversationMetric: ConversationMetric): Boolean = {
+    conversationMetric.event.eventStart.zonedDateTime.isBefore(conversationMetric.event.eventEnd.zonedDateTime)
+  }
 
-    conversationMetric.event.eventType match {
-      case EventType("NOTIFICATION") =>
-        metricsRepo.updateWithFirstNotification(conversationMetric).map { conversationMetric =>
-          val originalEventType = conversationMetric.events.head.eventType
-          recordTime(s"$originalEventType-round-trip", calculateElapsedTime(conversationMetric.events.head.eventStart, conversationMetric.events(1).eventEnd))
-          Right(())
-        }
+  def process(conversationMetric: ConversationMetric): Future[Either[Result, Unit]] = {
 
-      case EventType(eventType) =>
-        metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event))).map {
-          case true =>
-            recordTime(s"$eventType-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
-            Right(())
-          case false => Left(ErrorInternalServerError)
+    validatePayload(conversationMetric) match {
+      case true =>
+        conversationMetric.event.eventType match {
+          case EventType("NOTIFICATION") =>
+            metricsRepo.updateWithFirstNotification(conversationMetric).map { conversationMetric =>
+              val originalEventType = conversationMetric.events.head.eventType
+              recordTime(s"$originalEventType-round-trip", calculateElapsedTime(conversationMetric.events.head.eventStart, conversationMetric.events(1).eventEnd))
+              Right(())
+            }
+
+          case EventType(eventType) =>
+            metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event))).map {
+              case true =>
+                recordTime(s"$eventType-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
+                Right(())
+              case false => Left(ErrorInternalServerError.JsonResult)
+            }
         }
+      case false =>
+        Future.successful(Left(ErrorResponse.errorBadRequest("Start date time must be before end date time").JsonResult))
     }
-
   }
 
   private def calculateElapsedTime(start: EventTimeStamp, end: EventTimeStamp): Duration = {

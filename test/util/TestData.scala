@@ -57,6 +57,15 @@ object TestData {
        |}
     """.stripMargin)
 
+  val InvalidDateTimeStampsJson: JsValue = Json.parse("""
+      |{
+      | "eventType": "DECLARATION",
+      | "conversationId": "dff783d7-44ee-4836-93d0-3242da7c225f",
+      | "eventStart": "2014-10-23T00:35:14.123Z",
+      | "eventEnd": "2014-10-21T00:36:14.123Z"
+      |}
+    """.stripMargin)
+
   val InvalidJson: JsValue = Json.parse("""
        |{
        | "eventType": "DECLARATION"
@@ -72,6 +81,10 @@ object TestData {
   val InvalidRequest: FakeRequest[AnyContentAsJson] = FakeRequest("POST","/log-times")
     .withHeaders(RequestHeaders.ValidHeaders.toSeq: _*)
     .withJsonBody(InvalidJson)
+
+  val InvalidDateTimeStampRequest: FakeRequest[AnyContentAsJson] = FakeRequest("POST","/log-times")
+    .withHeaders(RequestHeaders.ValidHeaders.toSeq: _*)
+    .withJsonBody(InvalidDateTimeStampsJson)
 
   val InvalidAcceptHeaderRequest: FakeRequest[Try[JsValue]] = FakeRequest()
     .withHeaders(RequestHeaders.ACCEPT_HEADER_INVALID, RequestHeaders.CONTENT_TYPE_HEADER).withBody(Try(ValidJson))

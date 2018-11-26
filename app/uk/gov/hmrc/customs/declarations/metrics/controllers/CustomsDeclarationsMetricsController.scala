@@ -52,8 +52,10 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
           js.validate[ConversationMetric] match {
             case JsSuccess(requestPayload, _) =>
               logger.debug(s"Log-time endpoint called with payload $requestPayload and headers ${request.headers}")
-              metricsService.process(requestPayload)
-              Future.successful(Accepted)
+              metricsService.process(requestPayload).map {
+                case Right(_) => Accepted
+                case Left(errorResult) => errorResult
+              }
             case error: JsError =>
               logger.error(s"JSON payload failed schema validation with error $error")
               Future.successful(invalidJsonErrorResponse(error).JsonResult)

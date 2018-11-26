@@ -16,9 +16,10 @@
 
 package unit.controllers
 
-import org.mockito.Mockito.RETURNS_DEEP_STUBS
+import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito.{RETURNS_DEEP_STUBS, when}
+import org.scalatest.Matchers
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, Matchers}
 import play.api.i18n.MessagesApi
 import play.api.libs.json
 import play.api.libs.json.JsValue
@@ -28,6 +29,7 @@ import play.api.test._
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController
+import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetric
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
 import uk.gov.hmrc.play.test.UnitSpec
 import util.MockitoPassByNameHelper.PassByNameVerifier
@@ -76,6 +78,8 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
     }
 
     "handle valid post to log-time endpoint and respond appropriately" in new SetUp() {
+      when(mockService.process(any[ConversationMetric])).thenReturn(Future.successful(Right(())))
+
       testSubmitResult(ValidRequestAsTryJsValue) { result =>
         status(result) shouldBe ACCEPTED
       }
