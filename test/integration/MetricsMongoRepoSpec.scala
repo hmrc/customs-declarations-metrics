@@ -84,8 +84,8 @@ class MetricsMongoRepoSpec extends UnitSpec
       collectionSize shouldBe 1
 
       val findResult = await(repository.collection.find(selector(DeclarationConversationId)).one[ConversationMetrics]).get
-      findResult.conversationId should not be None
-      findResult.events.head.eventType should not be None
+      findResult.conversationId.id.toString shouldBe "dff783d7-44ee-4836-93d0-3242da7c225f"
+      findResult.events.head.eventType.eventTypeString shouldBe "DECLARATION"
       findResult.events.head.eventStart should not be None
       findResult.events.head.eventEnd should not be None
     }
@@ -101,7 +101,9 @@ class MetricsMongoRepoSpec extends UnitSpec
 
       val findResult = await(repository.collection.find(selector(DeclarationConversationId)).one[ConversationMetrics]).get
       findResult.events.size shouldBe 2
-      findResult.conversationId should not be None
+      findResult.conversationId.id.toString shouldBe "dff783d7-44ee-4836-93d0-3242da7c225f"
+      findResult.events.head.eventType.eventTypeString shouldBe "DECLARATION"
+      findResult.events(1).eventType.eventTypeString shouldBe "NOTIFICATION"
     }
 
   }

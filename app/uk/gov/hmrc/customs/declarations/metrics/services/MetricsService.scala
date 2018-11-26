@@ -35,22 +35,21 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
   def process(conversationMetric: ConversationMetric): Future[Either[ErrorResponse, Unit]] = {
 
     conversationMetric.event.eventType match {
-      case EventType("DECLARATION") =>
-        //DECLARATION => store in Mongo, calc elapsed time from two timestamps & store duration in graphite
+      case EventType("NOTIFICATION") =>
+        metricsRepo.updateWithFirstNotification(conversationMetric).map { conversationMetric =>
+          val originalEventType = conversationMetric.events.head.eventType
+          recordTime(s"$originalEventType-round-trip", calculateElapsedTime(conversationMetric.events.head.eventStart, conversationMetric.events(1).eventEnd))
+          Right(())
+        }
+
+      case EventType(eventType) =>
         metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event))).map {
           case true =>
-            recordTime("declaration-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
+            recordTime(s"$eventType-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
             Right(())
           case false => Left(ErrorInternalServerError)
         }
 
-      case EventType("DEC-NOTIFICATION") =>
-        //NOTIFICATION => find & update mongo rec only where no cn previously received, calc round trip time & store duration in graphite
-        metricsRepo.updateWithFirstNotification(conversationMetric).map { conversationMetric =>
-          //TODO replace timestamp extraction with reference to EventType, not position
-          recordTime("declaration-round-trip", calculateElapsedTime(conversationMetric.events.head.eventStart, conversationMetric.events(1).eventEnd))
-          Right(())
-        }
     }
 
   }

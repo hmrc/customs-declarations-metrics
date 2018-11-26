@@ -73,7 +73,7 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
 
     //TODO add criteria to selector so that update is only done when metric contains Declaration event only
     val selector = Json.obj("conversationId" -> conversationMetric.conversationId.id)
-    val update = Json.obj("$addToSet" -> Json.obj("events" -> conversationMetric.event))
+    val update = Json.obj("$push" -> Json.obj("events" -> conversationMetric.event))
 
     val result: Future[ConversationMetrics] = collection.findAndUpdate(selector, update).map { result =>
       result.result[ConversationMetrics].getOrElse(throw new IllegalStateException(errorMsg))
