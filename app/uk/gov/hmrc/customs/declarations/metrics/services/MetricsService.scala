@@ -38,7 +38,7 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
   }
 
   def process(conversationMetric: ConversationMetric): Future[Either[Result, Unit]] = {
-
+    logger.debug(s"received conversation metric $")
     validatePayload(conversationMetric) match {
       case true =>
         conversationMetric.event.eventType match {

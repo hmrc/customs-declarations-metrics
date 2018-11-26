@@ -52,8 +52,6 @@ class MetricsServiceSpec extends UnitSpec
     val mockRepo = mock[MetricsRepo]
     val mockMetricsRegistry = mock[MetricRegistry](RETURNS_DEEP_STUBS)
 
-
-
     when(mockMetrics.defaultRegistry).thenReturn(mockMetricsRegistry)
     val service = new MetricsService(mockLogger, mockRepo, mockMetrics) with FakeHasMetrics
   }

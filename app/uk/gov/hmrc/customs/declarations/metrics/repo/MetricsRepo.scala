@@ -40,7 +40,7 @@ trait MetricsRepo {
 class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
                                   errorHandler: MetricsRepoErrorHandler,
                                   logger: CdsLogger) extends ReactiveRepository[ConversationMetrics, BSONObjectID](
-  collectionName = "logTimes",
+  collectionName = "metrics",
   mongo = mongoDbProvider.mongo,
   domainFormat = ConversationMetrics.conversationMetricsJF
 ) with MetricsRepo {
@@ -68,12 +68,12 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
 
   override def updateWithFirstNotification(conversationMetric: ConversationMetric): Future[ConversationMetrics] = {
     logger.debug(s"updating with first notification: $conversationMetric")
-    lazy val errorMsg = s"event data not inserted for $conversationMetric"
+    lazy val errorMsg = s"event data not updated for $conversationMetric"
 
     val selector = Json.obj("conversationId" -> conversationMetric.conversationId.id, "events.1" -> Json.obj("$exists" -> false))
     val update = Json.obj("$push" -> Json.obj("events" -> conversationMetric.event))
 
-    val result: Future[ConversationMetrics] = collection.findAndUpdate(selector, update).map { result =>
+    val result: Future[ConversationMetrics] = collection.findAndUpdate(selector, update, fetchNewObject = true).map { result =>
       result.result[ConversationMetrics].getOrElse(throw new IllegalStateException(errorMsg))
     }
     result
