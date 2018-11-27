@@ -62,14 +62,9 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
           }
 
         case Failure(ex) =>
-          logger.error(nonJsonBodyErrorMessage)
+          logger.error(s"$nonJsonBodyErrorMessage ${ex.getMessage}")
           Future.successful(errorBadRequest(nonJsonBodyErrorMessage).JsonResult)
       }
-  }
-
-  def helloWorld: Action[mvc.AnyContent] = Action {
-    logger.debug("Hello World!!")
-    Ok("Hello World!!")
   }
 
   protected def invalidJsonErrorResponse(jsError: JsError)(implicit messages: Messages, hc: HeaderCarrier): ErrorResponse = {

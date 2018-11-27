@@ -81,7 +81,7 @@ class MetricsServiceSpec extends UnitSpec
 
       val result = await(service.process(NotificationConversationMetric))
       service.recordTimeArgumentCaptor.size shouldBe 1
-      service.recordTimeArgumentCaptor.head._1 shouldBe "EventType(DECLARATION)-round-trip"
+      service.recordTimeArgumentCaptor.head._1 shouldBe "declaration-round-trip"
       service.recordTimeArgumentCaptor.head._2 shouldBe Duration.between(DeclarationConversationMetric.event.eventStart.zonedDateTime,
                                                                           NotificationConversationMetric.event.eventEnd.zonedDateTime)
       verify(mockRepo).updateWithFirstNotification(any[ConversationMetric])

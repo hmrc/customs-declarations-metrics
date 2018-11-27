@@ -57,14 +57,6 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
 
   "CustomsDeclarationsMetricsController" should {
 
-    "handle valid get and respond appropriately" in new SetUp() {
-      val home: Future[Result] = controller.helloWorld.apply(FakeRequest(GET, "/api"))
-
-      status(home) shouldBe OK
-      contentType(home) shouldBe Some("text/plain")
-      contentAsString(home) should include("Hello World!!")
-    }
-
     "respond with status 406 for an invalid Accept header" in new SetUp() {
       testSubmitResult(InvalidAcceptHeaderRequest) { result =>
         status(result) shouldBe NOT_ACCEPTABLE
@@ -98,7 +90,7 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
       }
 
       PassByNameVerifier(mockLogger, "error")
-        .withByNameParam[String]("Request does not contain a valid JSON body")
+        .withByNameParam[String]("Request does not contain a valid JSON body No content to map due to end-of-input\n at [Source: ; line: 1, column: 0]")
         .verify()
     }
 

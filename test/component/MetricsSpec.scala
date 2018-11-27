@@ -88,7 +88,7 @@ class MetricsSpec extends FeatureSpec
       status(resultFuture) shouldBe BAD_REQUEST
 
       And("the response body contains the error")
-      contentAsString(resultFuture) shouldBe """{"code":"BAD_REQUEST","message":"Start date time must be before end date time"}"""
+      contentAsString(resultFuture) shouldBe """{"code":"BAD_REQUEST","message":"Invalid Payload"}"""
     }
 
   }

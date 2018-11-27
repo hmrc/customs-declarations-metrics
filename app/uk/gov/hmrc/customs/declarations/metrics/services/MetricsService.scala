@@ -36,30 +36,33 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
   def process(conversationMetric: ConversationMetric): Future[Either[Result, Unit]] = {
 
     logger.debug(s"received conversation metric $conversationMetric")
+
     validatePayload(conversationMetric) match {
       case true =>
         conversationMetric.event.eventType match {
           case EventType("NOTIFICATION") =>
             metricsRepo.updateWithFirstNotification(conversationMetric).map { conversationMetric =>
               val originalEventType = conversationMetric.events.head.eventType
-              recordTime(s"$originalEventType-round-trip", calculateElapsedTime(conversationMetric.events.head.eventStart, conversationMetric.events(1).eventEnd))
+              recordTime(s"${originalEventType.eventTypeString.toLowerCase}-round-trip", calculateElapsedTime(conversationMetric.events.head.eventStart, conversationMetric.events(1).eventEnd))
               Right(())
             }
 
           case EventType(eventType) =>
             metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event))).map {
               case true =>
-                recordTime(s"$eventType-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
+                recordTime(s"${eventType.toLowerCase}-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
                 Right(())
               case false => Left(ErrorInternalServerError.JsonResult)
             }
         }
       case false =>
-        Future.successful(Left(ErrorResponse.errorBadRequest("Start date time must be before end date time").JsonResult))
+        logger.error(s"Invalid payload $conversationMetric")
+        Future.successful(Left(ErrorResponse.errorBadRequest("Invalid Payload").JsonResult))
     }
   }
 
   private def validatePayload(conversationMetric: ConversationMetric): Boolean = {
+    conversationMetric.event.eventType.eventTypeString.isEmpty ||
     conversationMetric.event.eventStart.zonedDateTime.isBefore(conversationMetric.event.eventEnd.zonedDateTime)
   }
 

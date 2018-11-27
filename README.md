@@ -11,9 +11,7 @@ This is a placeholder README.md for a new repository
 * need test for INDEX
 * test for record time in graphite. 
 * This readME
-* review Logging and add logging in Metrics Service
-* remove hello world code
-
+* extra metrics - total time in digital, notification digital
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
 

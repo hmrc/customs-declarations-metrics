@@ -1,5 +1,4 @@
 ->          /                       health.Routes
 
-GET       /api                      uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController.helloWorld
 POST      /log-times                uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController.post()
 

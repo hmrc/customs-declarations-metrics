@@ -50,7 +50,6 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
 
   override def indexes: Seq[Index] = Seq(
     Index(
-      //TODO check IndexType
       key = Seq("conversationId" -> IndexType.Ascending),
       name = Some("conversationId-Index"),
       unique = true
@@ -74,11 +73,12 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
     val update = Json.obj("$push" -> Json.obj("events" -> conversationMetric.event))
 
     val result: Future[ConversationMetrics] = collection.findAndUpdate(selector, update, fetchNewObject = true).map { result =>
-      result.result[ConversationMetrics].getOrElse(throw new IllegalStateException(errorMsg))
+      result.result[ConversationMetrics].getOrElse({
+        logger.error(errorMsg)
+        throw new IllegalStateException(errorMsg)
+      })
     }
     result
   }
-
-  //TODO need test for INDEX
 
 }
