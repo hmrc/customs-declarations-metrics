@@ -39,10 +39,10 @@ class MetricsServiceSpec extends UnitSpec
   with Matchers with MockitoSugar {
 
   trait FakeHasMetrics extends HasMetrics{
-   var recordTimeArgumentCaptor = Map[String, Duration]()
+   var recordTimeArgumentCaptor = scala.collection.immutable.Map[String, Duration]()
     override lazy val registry: MetricRegistry = mock[MetricRegistry]
     override def recordTime(timerName: Metric, duration: Duration): Unit = {
-      recordTimeArgumentCaptor = Map(timerName -> duration)
+      recordTimeArgumentCaptor = recordTimeArgumentCaptor + (timerName -> duration)
     }
   }
 
@@ -76,14 +76,15 @@ class MetricsServiceSpec extends UnitSpec
       await(result) shouldBe Left(ErrorInternalServerError.JsonResult)
     }
 
-    "save a notification metric successfully" in new SetUp() {
+    "save a notification metric successfully and record 3 metrics" in new SetUp() {
       when(mockRepo.updateWithFirstNotification(any[ConversationMetric])).thenReturn(Future.successful(ConversationMetrics1))
 
       val result = await(service.process(NotificationConversationMetric))
-      service.recordTimeArgumentCaptor.size shouldBe 1
-      service.recordTimeArgumentCaptor.head._1 shouldBe "declaration-round-trip"
-      service.recordTimeArgumentCaptor.head._2 shouldBe Duration.between(DeclarationConversationMetric.event.eventStart.zonedDateTime,
-                                                                          NotificationConversationMetric.event.eventEnd.zonedDateTime)
+      service.recordTimeArgumentCaptor.size shouldBe 3
+      service.recordTimeArgumentCaptor("declaration-round-trip").toMillis shouldBe 64000
+      service.recordTimeArgumentCaptor("notification-digital").toMillis shouldBe 4000
+      service.recordTimeArgumentCaptor("declaration-digital-total").toMillis shouldBe 6000
+
       verify(mockRepo).updateWithFirstNotification(any[ConversationMetric])
       await(result) shouldBe Right(())
     }

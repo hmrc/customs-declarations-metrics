@@ -9,9 +9,8 @@ This is a placeholder README.md for a new repository
 * consider simplifying some of the serialisation in models
 * check indexType
 * need test for INDEX
-* test for record time in graphite. 
 * This readME
-* extra metrics - total time in digital, notification digital
+
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
 

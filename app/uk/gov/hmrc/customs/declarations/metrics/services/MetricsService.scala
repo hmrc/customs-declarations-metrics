@@ -24,7 +24,7 @@ import play.api.mvc.Result
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorInternalServerError
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, EventTimeStamp, EventType}
+import uk.gov.hmrc.customs.declarations.metrics.model._
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -41,12 +41,13 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
       case true =>
         conversationMetric.event.eventType match {
           case EventType("NOTIFICATION") =>
-            metricsRepo.updateWithFirstNotification(conversationMetric).map { conversationMetric =>
-              val originalEventType = conversationMetric.events.head.eventType
-              recordTime(s"${originalEventType.eventTypeString.toLowerCase}-round-trip", calculateElapsedTime(conversationMetric.events.head.eventStart, conversationMetric.events(1).eventEnd))
+            metricsRepo.updateWithFirstNotification(conversationMetric).map { conversationMetrics =>
+              val originalEventType = conversationMetrics.events.head.eventType
+              recordTime(s"${originalEventType.eventTypeString.toLowerCase}-round-trip", calculateElapsedTime(conversationMetrics.events.head.eventStart, conversationMetrics.events(1).eventEnd))
+              recordTime("notification-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
+              recordTime(s"${originalEventType.eventTypeString.toLowerCase}-digital-total", calculateDigtalElapsedTime(conversationMetrics.events.head, conversationMetric.event))
               Right(())
             }
-
           case EventType(eventType) =>
             metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event))).map {
               case true =>
@@ -64,6 +65,10 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
   private def validatePayload(conversationMetric: ConversationMetric): Boolean = {
     conversationMetric.event.eventType.eventTypeString.isEmpty ||
     conversationMetric.event.eventStart.zonedDateTime.isBefore(conversationMetric.event.eventEnd.zonedDateTime)
+  }
+
+  private def calculateDigtalElapsedTime(declarationEvent: Event, notificationEvent: Event): Duration ={
+    calculateElapsedTime(declarationEvent.eventStart,declarationEvent.eventEnd).plus(calculateElapsedTime(notificationEvent.eventStart, notificationEvent.eventEnd))
   }
 
   private def calculateElapsedTime(start: EventTimeStamp, end: EventTimeStamp): Duration = {
