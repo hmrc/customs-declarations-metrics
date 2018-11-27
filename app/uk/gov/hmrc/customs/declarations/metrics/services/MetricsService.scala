@@ -48,6 +48,9 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
               recordTime("notification-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
               recordTime(s"${originalEventType.eventTypeString.toLowerCase}-digital-total", calculateDigitalElapsedTime(conversationMetrics.events.head, conversationMetric.event))
               Right(())
+            }.recover {
+              case e: Throwable =>
+                Right(())
             }
           case EventType(eventType) =>
             metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event))).map {
@@ -55,6 +58,10 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
                 recordTime(s"${eventType.toLowerCase}-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
                 Right(())
               case false => Left(ErrorInternalServerError.JsonResult)
+            }.recover {
+              case e: Throwable =>
+                logger.error(s"failed saving metric: ${e.getMessage}")
+                Right(())
             }
         }
       case false =>

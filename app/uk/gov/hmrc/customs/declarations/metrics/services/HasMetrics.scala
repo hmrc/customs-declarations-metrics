@@ -31,11 +31,13 @@ trait HasMetrics {
 
   lazy val registry: MetricRegistry = metrics.defaultRegistry
 
-  def recordTime(timerName: Metric, duration: Duration): Unit = {
+  def recordTime(metric: Metric, duration: Duration): Unit = {
 
     registry.getTimers
-      .getOrDefault(timerName, registry.timer(timerName))
+      .getOrDefault(metric, registry.timer(metric))
       .update(duration.toMillis, MILLISECONDS)
+
+    registry.counter(s"$metric-counter").inc()
   }
 
 }

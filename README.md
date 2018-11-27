@@ -5,10 +5,8 @@ This service is used by customs-declarations and customs-notification to handle 
 The metric events are persisted in Mongo
  
 ### Stuff left TODO
-* consider simplifying some of the serialisation in models
-* need test for INDEX
-* 2nd and 3rd notification should return ACCEPTED
-* grafana graphs
+* improve coverage for exception cases
+* grafana graphs & non-infinite counter
 * TTL in mongo
 
 | Path                                                                                                                            |  Method  | Description                                |

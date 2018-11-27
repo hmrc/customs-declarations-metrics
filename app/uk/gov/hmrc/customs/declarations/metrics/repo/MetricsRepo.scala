@@ -75,10 +75,17 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
     val update = Json.obj("$push" -> Json.obj("events" -> conversationMetric.event))
 
     val result: Future[ConversationMetrics] = collection.findAndUpdate(selector, update, fetchNewObject = true).map { result =>
-      result.result[ConversationMetrics].getOrElse({
-        logger.error(errorMsg)
-        throw new IllegalStateException(errorMsg)
-      })
+
+      //TODO make better!
+      if (result.lastError.isDefined && result.lastError.get.err.isDefined) {
+          logger.error(s"mongo error: ${result.lastError.get.err.get}")
+          throw new IllegalStateException(errorMsg)
+      } else {
+        result.result[ConversationMetrics].getOrElse({
+          logger.debug(errorMsg)
+          throw new IllegalStateException(errorMsg)
+        })
+      }
     }
     result
   }
