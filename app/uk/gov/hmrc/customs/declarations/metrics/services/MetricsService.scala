@@ -17,8 +17,8 @@
 package uk.gov.hmrc.customs.declarations.metrics.services
 
 import java.time.Duration
+import javax.inject.{Inject, Singleton}
 
-import javax.inject.Inject
 import com.kenshoo.play.metrics.Metrics
 import play.api.mvc.Result
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
@@ -31,6 +31,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Left
 
+@Singleton
 class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics) extends HasMetrics {
 
   def process(conversationMetric: ConversationMetric): Future[Either[Result, Unit]] = {
@@ -45,7 +46,7 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
               val originalEventType = conversationMetrics.events.head.eventType
               recordTime(s"${originalEventType.eventTypeString.toLowerCase}-round-trip", calculateElapsedTime(conversationMetrics.events.head.eventStart, conversationMetrics.events(1).eventEnd))
               recordTime("notification-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
-              recordTime(s"${originalEventType.eventTypeString.toLowerCase}-digital-total", calculateDigtalElapsedTime(conversationMetrics.events.head, conversationMetric.event))
+              recordTime(s"${originalEventType.eventTypeString.toLowerCase}-digital-total", calculateDigitalElapsedTime(conversationMetrics.events.head, conversationMetric.event))
               Right(())
             }
           case EventType(eventType) =>
@@ -67,7 +68,7 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
     conversationMetric.event.eventStart.zonedDateTime.isBefore(conversationMetric.event.eventEnd.zonedDateTime)
   }
 
-  private def calculateDigtalElapsedTime(declarationEvent: Event, notificationEvent: Event): Duration ={
+  private def calculateDigitalElapsedTime(declarationEvent: Event, notificationEvent: Event): Duration ={
     calculateElapsedTime(declarationEvent.eventStart,declarationEvent.eventEnd).plus(calculateElapsedTime(notificationEvent.eventStart, notificationEvent.eventEnd))
   }
 

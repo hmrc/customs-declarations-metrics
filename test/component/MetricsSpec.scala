@@ -18,8 +18,6 @@ package component
 
 import org.scalatest.{Matchers, OptionValues, _}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc._
 import play.api.test.Helpers._
 import reactivemongo.bson.BSONObjectID
@@ -43,8 +41,6 @@ class MetricsSpec extends FeatureSpec
     collectionName = "metrics",
     mongo = app.injector.instanceOf[MongoDbProvider].mongo,
     domainFormat = ConversationMetrics.conversationMetricsJF) {  }
-
-  override implicit lazy val app: Application = new GuiceApplicationBuilder().build()
 
   override protected def beforeEach() {
     await(repo.drop)
