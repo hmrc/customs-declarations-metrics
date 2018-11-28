@@ -20,10 +20,10 @@ lazy val allResolvers =resolvers ++= Seq(
   Resolver.jcenterRepo
 )
 
-lazy val AcceptanceTest = config("acceptance") extend Test
+lazy val ComponentTest = config("component") extend Test
 lazy val CdsIntegrationTest = config("it") extend Test
 
-val testConfig = Seq(AcceptanceTest, CdsIntegrationTest, Test)
+val testConfig = Seq(ComponentTest, CdsIntegrationTest, Test)
 
 def forkedJvmPerTestConfig(tests: Seq[TestDefinition], packages: String*): Seq[Group] =
   tests.groupBy(_.name.takeWhile(_ != '.')).filter(packageAndTests => packages contains packageAndTests._1) map {
@@ -32,7 +32,7 @@ def forkedJvmPerTestConfig(tests: Seq[TestDefinition], packages: String*): Seq[G
   } toSeq
 
 lazy val testAll = TaskKey[Unit]("test-all")
-lazy val allTest = Seq(testAll := (test in AcceptanceTest)
+lazy val allTest = Seq(testAll := (test in ComponentTest)
   .dependsOn((test in CdsIntegrationTest).dependsOn(test in Test)).value)
 
 lazy val microservice = (project in file("."))
@@ -46,7 +46,7 @@ lazy val microservice = (project in file("."))
     commonSettings,
     unitTestSettings,
     integrationTestSettings,
-    acceptanceTestSettings,
+    componentTestSettings,
     playSettings,
     playPublishingSettings,
     allTest,
@@ -70,20 +70,20 @@ lazy val unitTestSettings =
 lazy val integrationTestSettings =
   inConfig(CdsIntegrationTest)(Defaults.testTasks) ++
     Seq(
-      testOptions in CdsIntegrationTest := Seq(Tests.Filters(Seq(onPackageName("integration"), onPackageName("acceptance")))),
+      testOptions in CdsIntegrationTest := Seq(Tests.Filters(Seq(onPackageName("integration"), onPackageName("component")))),
       fork in CdsIntegrationTest := false,
       parallelExecution in CdsIntegrationTest := false,
       addTestReportOption(CdsIntegrationTest, "int-test-reports"),
-      testGrouping in CdsIntegrationTest := forkedJvmPerTestConfig((definedTests in Test).value, "integration", "acceptance")
+      testGrouping in CdsIntegrationTest := forkedJvmPerTestConfig((definedTests in Test).value, "integration", "component")
     )
 
-lazy val acceptanceTestSettings =
-  inConfig(AcceptanceTest)(Defaults.testTasks) ++
+lazy val componentTestSettings =
+  inConfig(ComponentTest)(Defaults.testTasks) ++
     Seq(
-      testOptions in AcceptanceTest := Seq(Tests.Filter(onPackageName("acceptance"))),
-      fork in AcceptanceTest := false,
-      parallelExecution in AcceptanceTest := false,
-      addTestReportOption(AcceptanceTest, "acceptance-reports")
+      testOptions in ComponentTest := Seq(Tests.Filter(onPackageName("component"))),
+      fork in ComponentTest := false,
+      parallelExecution in ComponentTest := false,
+      addTestReportOption(ComponentTest, "component-reports")
     )
 
 lazy val commonSettings: Seq[Setting[_]] = scalaSettings ++
@@ -103,9 +103,10 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   coverageExcludedPackages := List(
     "<empty>"
     ,"Reverse.*"
-    ,".*(AuthService|BuildInfo|Routes).*"
+    ,"uk\\.gov\\.hmrc\\.customs\\.declarations\\.metrics\\.model\\..*"
+    ,".*(BuildInfo|Routes).*"
   ).mkString(";"),
-  coverageMinimum := 99,
+  coverageMinimum := 92,
   coverageFailOnMinimum := true,
   coverageHighlighting := true,
   parallelExecution in Test := false
