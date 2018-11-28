@@ -6,8 +6,6 @@ The metric events are persisted in Mongo
  
 ### Stuff left TODO
 * improve coverage for exception cases
-* grafana graphs & non-infinite counter
-* TTL in mongo
 
 | Path                                                                                                                            |  Method  | Description                                |
 |---------------------------------------------------------------------------------------------------------------------------------|----------|--------------------------------------------|

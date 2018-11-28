@@ -44,9 +44,9 @@ object TestData {
   val NotificationEvent = Event(NotificationEventType, NotificationEventTimeStampEntry, NotificationEventTimeStampExit)
   val NotificationConversationMetric = ConversationMetric(DeclarationConversationId, NotificationEvent)
 
-  val ConversationMetricsWithDeclarationEventOnly = ConversationMetrics(DeclarationConversationId, Seq(DeclarationEvent))
-  val ConversationMetricsWithNotificationEventOnly = ConversationMetrics(DeclarationConversationId, Seq(NotificationEvent))
-  val ConversationMetrics1 = ConversationMetrics(DeclarationConversationId, Seq(DeclarationEvent, NotificationEvent))
+  val ConversationMetricsWithDeclarationEventOnly = ConversationMetrics(DeclarationConversationId, Seq(DeclarationEvent), ZonedDateTime.now(ZoneId.of("UTC")))
+  val ConversationMetricsWithNotificationEventOnly = ConversationMetrics(DeclarationConversationId, Seq(NotificationEvent), ZonedDateTime.now(ZoneId.of("UTC")))
+  val ConversationMetrics1 = ConversationMetrics(DeclarationConversationId, Seq(DeclarationEvent, NotificationEvent), ZonedDateTime.now(ZoneId.of("UTC")))
 
   val ValidJson: JsValue = Json.parse("""
        |{

@@ -90,7 +90,7 @@ object ConversationMetric {
 
 }
 
-case class ConversationMetrics(conversationId: ConversationId, events: Seq[Event])
+case class ConversationMetrics(conversationId: ConversationId, events: Seq[Event], createdDate: ZonedDateTime)
 object ConversationMetrics {
   implicit val eventsReads: Reads[Seq[Event]] = Reads.seq(Event.eventReads)
   implicit val eventsWrites: Writes[Seq[Event]] = Writes.seq(Event.eventWrites)

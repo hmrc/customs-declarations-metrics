@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import play.api.libs.json.{Format, Json, OFormat}
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
 import reactivemongo.play.json.JsObjectDocumentWriter
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, Event}
@@ -49,12 +49,19 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
 
   private implicit val format: OFormat[ConversationMetrics] = ConversationMetrics.conversationMetricsJF
   private implicit val formatEvent: Format[Event] = Event.EventJF
+  private val ttlSeconds = 1209600 //two weeks in seconds
 
   override def indexes: Seq[Index] = Seq(
     Index(
       key = Seq("conversationId" -> IndexType.Ascending),
       name = Some("conversationId-Index"),
       unique = true
+    ),
+    Index(
+      key = Seq("createdDate" -> IndexType.Ascending),
+      name = Some("createdDate-Index"),
+      unique = true,
+      options = BSONDocument("expireAfterSeconds" -> BSONLong(ttlSeconds))
     )
   )
 

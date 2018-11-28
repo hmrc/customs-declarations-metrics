@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.services
 
-import java.time.Duration
+import java.time.{Duration, ZoneId, ZonedDateTime}
 import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
@@ -53,7 +53,7 @@ class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val 
                 Right(())
             }
           case EventType(eventType) =>
-            metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event))).map {
+            metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event), ZonedDateTime.now(ZoneId.of("UTC")))).map {
               case true =>
                 recordTime(s"${eventType.toLowerCase}-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
                 Right(())
