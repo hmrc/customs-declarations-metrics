@@ -83,7 +83,6 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
 
     val result: Future[ConversationMetrics] = collection.findAndUpdate(selector, update, fetchNewObject = true).map { result =>
 
-      //TODO make better!
       if (result.lastError.isDefined && result.lastError.get.err.isDefined) {
           logger.error(s"mongo error: ${result.lastError.get.err.get}")
           throw new IllegalStateException(errorMsg)

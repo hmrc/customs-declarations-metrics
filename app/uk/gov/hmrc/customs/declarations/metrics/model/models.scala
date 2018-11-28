@@ -22,7 +22,6 @@ import java.util.UUID
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-//TODO consider simplifying some of the serialisation below
 case class EventType(eventTypeString: String) extends AnyVal
 object EventType {
   implicit val eventTypeJF: Format[EventType] = new Format[EventType] {
