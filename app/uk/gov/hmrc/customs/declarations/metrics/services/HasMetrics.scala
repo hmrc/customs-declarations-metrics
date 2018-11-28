@@ -19,7 +19,7 @@ package uk.gov.hmrc.customs.declarations.metrics.services
 import java.time.Duration
 
 import com.kenshoo.play.metrics.Metrics
-import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit.NANOSECONDS
 
 import com.codahale.metrics.MetricRegistry
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
@@ -34,10 +34,11 @@ trait HasMetrics {
 
   def recordTime(metric: Metric, duration: Duration): Unit = {
 
-    logger.debug(s"recording ${duration.toMillis} ms for $metric")
+    val nanos = duration.toNanos
+    logger.debug(s"recording $nanos ns for $metric")
     registry.getTimers
       .getOrDefault(metric, registry.timer(metric))
-      .update(duration.toMillis, MILLISECONDS)
+      .update(nanos, NANOSECONDS)
 
     registry.counter(s"$metric-counter").inc()
   }
