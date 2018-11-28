@@ -32,7 +32,7 @@ import scala.concurrent.Future
 import scala.util.Left
 
 @Singleton
-class MetricsService @Inject()(logger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics) extends HasMetrics {
+class MetricsService @Inject()(val logger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics) extends HasMetrics {
 
   def process(conversationMetric: ConversationMetric): Future[Either[Result, Unit]] = {
 

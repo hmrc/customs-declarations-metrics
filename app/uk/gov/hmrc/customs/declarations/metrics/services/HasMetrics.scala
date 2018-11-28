@@ -22,17 +22,19 @@ import com.kenshoo.play.metrics.Metrics
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
 import com.codahale.metrics.MetricRegistry
+import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 
 trait HasMetrics {
   
   type Metric = String
-
   def metrics: Metrics
+  val logger: CdsLogger
 
   lazy val registry: MetricRegistry = metrics.defaultRegistry
 
   def recordTime(metric: Metric, duration: Duration): Unit = {
 
+    logger.debug(s"recording ${duration.toMillis} ms for $metric")
     registry.getTimers
       .getOrDefault(metric, registry.timer(metric))
       .update(duration.toMillis, MILLISECONDS)
