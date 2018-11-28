@@ -3,9 +3,6 @@
 
 This service is used by customs-declarations and customs-notification to handle sending metrics to graphite.
 The metric events are persisted in Mongo
- 
-### Stuff left TODO
-* improve coverage for exception cases
 
 | Path                                                                                                                            |  Method  | Description                                |
 |---------------------------------------------------------------------------------------------------------------------------------|----------|--------------------------------------------|
