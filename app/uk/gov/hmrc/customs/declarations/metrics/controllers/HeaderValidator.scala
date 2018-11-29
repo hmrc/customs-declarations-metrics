@@ -31,7 +31,7 @@ trait HeaderValidator extends Results {
 
   protected val logger: CdsLogger
 
-  def validateAccept(rules: Option[String] => Boolean): ActionBuilder[Request] = new ActionBuilder[Request] {
+  def validateHeaders(rules: Option[String] => Boolean): ActionBuilder[Request] = new ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
       val logMessage = "Received log-time request"
       val headers = request.headers.headers

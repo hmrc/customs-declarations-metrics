@@ -41,7 +41,7 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
   private val nonJsonBodyErrorMessage = "Request does not contain a valid JSON body"
   private def tryJsonParser: BodyParser[Try[JsValue]] = parse.tolerantText.map(text => Try(Json.parse(text)))
 
-  def post(): Action[Try[JsValue]] = validateAccept(AcceptHeaderValidation).async(tryJsonParser) {
+  def post(): Action[Try[JsValue]] = validateHeaders(AcceptHeaderValidation).async(tryJsonParser) {
     implicit request =>
 
       request.body match {
