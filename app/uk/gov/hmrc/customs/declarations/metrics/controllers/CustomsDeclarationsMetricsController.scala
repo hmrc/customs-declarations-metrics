@@ -17,10 +17,8 @@
 package uk.gov.hmrc.customs.declarations.metrics.controllers
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc
 import play.api.mvc.{Action, BodyParser}
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.errorBadRequest
 import uk.gov.hmrc.customs.api.common.controllers.{ErrorResponse, ResponseContents}
@@ -40,10 +38,10 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
                                                       val messagesApi: MessagesApi)
       extends BaseController with HeaderValidator with I18nSupport {
 
-  protected val nonJsonBodyErrorMessage = "Request does not contain a valid JSON body"
-  protected def tryJsonParser: BodyParser[Try[JsValue]] = parse.tolerantText.map(text => Try(Json.parse(text)))
+  private val nonJsonBodyErrorMessage = "Request does not contain a valid JSON body"
+  private def tryJsonParser: BodyParser[Try[JsValue]] = parse.tolerantText.map(text => Try(Json.parse(text)))
 
-  def post(): Action[Try[JsValue]] = validateAccept(acceptHeaderValidation).async(tryJsonParser) {
+  def post(): Action[Try[JsValue]] = validateAccept(AcceptHeaderValidation).async(tryJsonParser) {
     implicit request =>
 
       request.body match {
@@ -67,7 +65,7 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
       }
   }
 
-  protected def invalidJsonErrorResponse(jsError: JsError)(implicit messages: Messages, hc: HeaderCarrier): ErrorResponse = {
+  private def invalidJsonErrorResponse(jsError: JsError)(implicit messages: Messages, hc: HeaderCarrier): ErrorResponse = {
     val contents = for {
       (jsPath, validationErrors) <- jsError.errors
       validationError <- validationErrors

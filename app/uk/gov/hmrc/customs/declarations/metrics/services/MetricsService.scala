@@ -49,8 +49,7 @@ class MetricsService @Inject()(val logger: CdsLogger, metricsRepo: MetricsRepo, 
               recordTime(s"${originalEventType.eventTypeString.toLowerCase}-digital-total", calculateDigitalElapsedTime(conversationMetrics.events.head, conversationMetric.event))
               Right(())
             }.recover {
-              case e: Throwable =>
-                Right(())
+              case _: Throwable => Right(())
             }
           case EventType(eventType) =>
             metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event), ZonedDateTime.now(ZoneId.of("UTC")))).map {
