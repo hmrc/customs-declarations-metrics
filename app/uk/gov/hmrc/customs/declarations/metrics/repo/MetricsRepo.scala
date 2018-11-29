@@ -17,14 +17,13 @@
 package uk.gov.hmrc.customs.declarations.metrics.repo
 
 import javax.inject.{Inject, Singleton}
-
 import com.google.inject.ImplementedBy
 import play.api.libs.json.{Format, Json, OFormat}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
 import reactivemongo.play.json.JsObjectDocumentWriter
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, Event}
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, Event, MetricsConfig}
 import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -41,7 +40,8 @@ trait MetricsRepo {
 @Singleton
 class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
                                   errorHandler: MetricsRepoErrorHandler,
-                                  logger: CdsLogger) extends ReactiveRepository[ConversationMetrics, BSONObjectID](
+                                  logger: CdsLogger,
+                                  metricsConfig: MetricsConfig) extends ReactiveRepository[ConversationMetrics, BSONObjectID](
   collectionName = "metrics",
   mongo = mongoDbProvider.mongo,
   domainFormat = ConversationMetrics.conversationMetricsJF
@@ -49,7 +49,6 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
 
   private implicit val format: OFormat[ConversationMetrics] = ConversationMetrics.conversationMetricsJF
   private implicit val formatEvent: Format[Event] = Event.EventJF
-  private val ttlSeconds = 1209600 //two weeks in seconds
 
   override def indexes: Seq[Index] = Seq(
     Index(
@@ -61,7 +60,7 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
       key = Seq("createdDate" -> IndexType.Ascending),
       name = Some("createdDate-Index"),
       unique = true,
-      options = BSONDocument("expireAfterSeconds" -> BSONLong(ttlSeconds))
+      options = BSONDocument("expireAfterSeconds" -> BSONLong(metricsConfig.ttlInSeconds))
     )
   )
 

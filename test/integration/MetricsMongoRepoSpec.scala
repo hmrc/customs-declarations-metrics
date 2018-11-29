@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import reactivemongo.api.DB
 import reactivemongo.play.json.JsObjectDocumentWriter
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, ConversationMetrics}
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, ConversationMetrics, MetricsConfig}
 import uk.gov.hmrc.customs.declarations.metrics.repo.{MetricsMongoRepo, MetricsRepoErrorHandler, MongoDbProvider}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.MongoSpecSupport
@@ -44,16 +44,20 @@ class MetricsMongoRepoSpec extends UnitSpec
 
   private val mockLogger = mock[CdsLogger]
   private val mockErrorHandler = mock[MetricsRepoErrorHandler]
+  private val mockMetricsConfig = mock[MetricsConfig]
+
+  val twoWeeksInSeconds = 1209600
 
   private val mongoDbProvider = new MongoDbProvider {
     override val mongo: () => DB = self.mongo
   }
 
-  private val repository = new MetricsMongoRepo(mongoDbProvider, mockErrorHandler, mockLogger)
+  private val repository = new MetricsMongoRepo(mongoDbProvider, mockErrorHandler, mockLogger, mockMetricsConfig)
 
   override def beforeEach() {
     await(repository.drop)
     Mockito.reset(mockErrorHandler, mockLogger)
+    when(mockMetricsConfig.ttlInSeconds).thenReturn(twoWeeksInSeconds)
   }
 
   override def afterAll() {
@@ -66,13 +70,6 @@ class MetricsMongoRepoSpec extends UnitSpec
 
   private def selector(conversationId: ConversationId) = {
     Json.obj("conversationId" -> conversationId.id)
-  }
-
-  private def logVerifier(logLevel: String, logText: String) = {
-    PassByNameVerifier(mockLogger, logLevel)
-      .withByNameParam(logText)
-      .withParamMatcher(any[HeaderCarrier])
-      .verify()
   }
 
   "repository" should {
