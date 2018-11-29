@@ -25,7 +25,6 @@ import play.api.libs.json
 import play.api.libs.json.JsValue
 import play.api.mvc.{Request, Result}
 import play.api.test.Helpers._
-import play.api.test._
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController

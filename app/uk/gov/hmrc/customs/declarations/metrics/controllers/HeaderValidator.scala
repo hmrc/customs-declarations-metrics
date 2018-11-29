@@ -27,11 +27,11 @@ trait HeaderValidator extends Results {
 
   private lazy val validAcceptHeaders = Seq("application/vnd.hmrc.1.0+json", MimeTypes.JSON)
 
-  val acceptHeaderValidation: (Option[String] => Boolean) = _ exists (validAcceptHeaders.contains(_))
+  val AcceptHeaderValidation: (Option[String] => Boolean) = _ exists (validAcceptHeaders.contains(_))
 
-  val logger: CdsLogger
+  protected val logger: CdsLogger
 
-  def validateAccept(rules: Option[String] => Boolean): ActionBuilder[Request] = new ActionBuilder[Request] {
+  def validateHeaders(rules: Option[String] => Boolean): ActionBuilder[Request] = new ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
       val logMessage = "Received log-time request"
       val headers = request.headers.headers
