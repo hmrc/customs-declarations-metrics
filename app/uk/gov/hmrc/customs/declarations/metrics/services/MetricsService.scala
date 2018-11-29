@@ -38,34 +38,33 @@ class MetricsService @Inject()(val logger: CdsLogger, metricsRepo: MetricsRepo, 
 
     logger.debug(s"received conversation metric $conversationMetric")
 
-    validatePayload(conversationMetric) match {
-      case true =>
-        conversationMetric.event.eventType match {
-          case EventType("NOTIFICATION") =>
-            metricsRepo.updateWithFirstNotification(conversationMetric).map { conversationMetrics =>
-              val originalEventType = conversationMetrics.events.head.eventType
-              recordTime(s"${originalEventType.eventTypeString.toLowerCase}-round-trip", calculateElapsedTime(conversationMetrics.events.head.eventStart, conversationMetrics.events(1).eventEnd))
-              recordTime("notification-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
-              recordTime(s"${originalEventType.eventTypeString.toLowerCase}-digital-total", calculateDigitalElapsedTime(conversationMetrics.events.head, conversationMetric.event))
+    if (validatePayload(conversationMetric)) {
+      conversationMetric.event.eventType match {
+        case EventType("NOTIFICATION") =>
+          metricsRepo.updateWithFirstNotification(conversationMetric).map { conversationMetrics =>
+            val originalEventType = conversationMetrics.events.head.eventType
+            recordTime(s"${originalEventType.eventTypeString.toLowerCase}-round-trip", calculateElapsedTime(conversationMetrics.events.head.eventStart, conversationMetrics.events(1).eventEnd))
+            recordTime("notification-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
+            recordTime(s"${originalEventType.eventTypeString.toLowerCase}-digital-total", calculateDigitalElapsedTime(conversationMetrics.events.head, conversationMetric.event))
+            Right(())
+          }.recover {
+            case _: Throwable => Right(())
+          }
+        case EventType(eventType) =>
+          metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event), ZonedDateTime.now(ZoneId.of("UTC")))).map {
+            case true =>
+              recordTime(s"${eventType.toLowerCase}-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
               Right(())
-            }.recover {
-              case _: Throwable => Right(())
-            }
-          case EventType(eventType) =>
-            metricsRepo.save(ConversationMetrics(conversationMetric.conversationId, Seq(conversationMetric.event), ZonedDateTime.now(ZoneId.of("UTC")))).map {
-              case true =>
-                recordTime(s"${eventType.toLowerCase}-digital", calculateElapsedTime(conversationMetric.event.eventStart, conversationMetric.event.eventEnd))
-                Right(())
-              case false => Left(ErrorInternalServerError.JsonResult)
-            }.recover {
-              case e: Throwable =>
-                logger.error(s"failed saving metric: ${e.getMessage}")
-                Right(())
-            }
-        }
-      case false =>
-        logger.error(s"Invalid payload $conversationMetric")
-        Future.successful(Left(ErrorResponse.errorBadRequest("Invalid Payload").JsonResult))
+            case false => Left(ErrorInternalServerError.JsonResult)
+          }.recover {
+            case e: Throwable =>
+              logger.error(s"failed saving metric: ${e.getMessage}")
+              Right(())
+          }
+      }
+    } else {
+      logger.error(s"Invalid payload $conversationMetric")
+      Future.successful(Left(ErrorResponse.errorBadRequest("Invalid Payload").JsonResult))
     }
   }
 

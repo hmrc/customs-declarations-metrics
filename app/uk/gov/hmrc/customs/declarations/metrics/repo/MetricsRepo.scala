@@ -59,7 +59,7 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
     Index(
       key = Seq("createdDate" -> IndexType.Ascending),
       name = Some("createdDate-Index"),
-      options = BSONDocument("expireAfterSeconds" -> BSONLong(ttlSeconds))
+      options = BSONDocument("expireAfterSeconds" -> BSONLong(metricsConfig.ttlInSeconds))
     )
   )
 
