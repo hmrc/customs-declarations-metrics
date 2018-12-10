@@ -22,23 +22,34 @@ import java.util.UUID
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
+object RequestReads {
+  val dateTimeRequestReads: Reads[ZonedDateTime] = JsPath.read[String].map { zonedDateTime =>
+    ZonedDateTime.parse(zonedDateTime)
+  }
+
+  val eventRequestReads: Reads[Event] = (
+    (__ \ "eventType").read[EventType] and
+    (__ \ "eventStart").read[ZonedDateTime](dateTimeRequestReads) and
+    (__ \ "eventEnd").read[ZonedDateTime](dateTimeRequestReads)) (Event.apply _)
+
+  val conversationMetricRequestReads: Reads[ConversationMetric] = (
+    (__ \ "conversationId").read[ConversationId] and eventRequestReads
+    )(ConversationMetric.apply _)
+}
+
 object DateTimeFormats {
-  val dateTimeDbRead: Reads[ZonedDateTime] =
+  val dateTimeReads: Reads[ZonedDateTime] =
     (__ \ "$date").read[Long].map { zonedDateTime =>
       val instant = Instant.ofEpochMilli(zonedDateTime)
       ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"))
     }
-
-//  val dateTimeRequestRead: Reads[ZonedDateTime] =
-//    __.read[String].map { zonedDateTime => ZonedDateTime.parse(zonedDateTime) }
 
   implicit val dateTimeWrite: Writes[ZonedDateTime] = new Writes[ZonedDateTime] {
     def writes(zonedDateTime: ZonedDateTime): JsValue = Json.obj("$date" -> zonedDateTime.toInstant.toEpochMilli
     )
   }
 
-  implicit val dateTimeDbFormats = Format(dateTimeDbRead, dateTimeWrite)
-//  val dateTimeRequestFormats = Format(dateTimeRequestRead, dateTimeWrite)
+  implicit val dateTimeJF = Format(dateTimeReads, dateTimeWrite)
 }
 
 case class EventType(eventTypeString: String) extends AnyVal
@@ -67,34 +78,29 @@ object ConversationId {
 
 case class Event(eventType: EventType, eventStart: ZonedDateTime, eventEnd: ZonedDateTime)
 object Event {
-  implicit val dateTimeFormats = DateTimeFormats.dateTimeDbFormats
-  implicit val eventDbReads: Reads[Event] = (
+  implicit val dateTimeFormats = DateTimeFormats.dateTimeJF
+  implicit val eventReads: Reads[Event] = (
     (__ \ "eventType").read[EventType] and
     (__ \ "eventStart").read[ZonedDateTime] and
     (__ \ "eventEnd").read[ZonedDateTime]) (Event.apply _)
-//  val eventRequestReads: Reads[Event] = (
-//    (__ \ "eventType").read[EventType] and
-//      (__ \ "eventStart").read[ZonedDateTime](DateTimeFormats.dateTimeRequestFormats) and
-//      (__ \ "eventEnd").read[ZonedDateTime](DateTimeFormats.dateTimeRequestFormats)) (Event.apply _)
   implicit val eventWrites: OWrites[Event] = (
     (__ \ "eventType").write[EventType] and
     (__ \ "eventStart").write[ZonedDateTime] and
     (__ \ "eventEnd").write[ZonedDateTime]) (unlift(Event.unapply))
 
-  implicit val EventDbJF: Format[Event] = Format(eventDbReads, eventWrites)
-//  val EventRequestJF: Format[Event] = Format(eventRequestReads, eventWrites)
+  implicit val EventJF: Format[Event] = Format(eventReads, eventWrites)
 }
 
 case class ConversationMetric(conversationId: ConversationId, event: Event)
 object ConversationMetric {
-  implicit val dateTimeFormats = DateTimeFormats.dateTimeDbFormats
+  implicit val dateTimeFormats = DateTimeFormats.dateTimeJF
   implicit val conversationMetricReads: Reads[ConversationMetric] = (
-    (JsPath \ "conversationId").read[ConversationId] and
-    Event.eventDbReads
+    (__ \ "conversationId").read[ConversationId] and
+    Event.eventReads
   )(ConversationMetric.apply _)
 
   implicit val conversationMetricWrites: OWrites[ConversationMetric] =(
-    (JsPath \ "conversationId").write[ConversationId] and
+    (__ \ "conversationId").write[ConversationId] and
       Event.eventWrites) (unlift(ConversationMetric.unapply))
 
   implicit val conversationMetricJF: Format[ConversationMetric] = Format(conversationMetricReads, conversationMetricWrites)
@@ -103,8 +109,8 @@ object ConversationMetric {
 case class ConversationMetrics(conversationId: ConversationId, events: Seq[Event], createdDate: ZonedDateTime)
 object ConversationMetrics {
 
-  implicit val dateTimeFormats = DateTimeFormats.dateTimeDbFormats
-  implicit val eventsReads: Reads[Seq[Event]] = Reads.seq(Event.eventDbReads)
+  implicit val dateTimeFormats = DateTimeFormats.dateTimeJF
+  implicit val eventsReads: Reads[Seq[Event]] = Reads.seq(Event.eventReads)
   implicit val eventsWrites: Writes[Seq[Event]] = Writes.seq(Event.eventWrites)
 
   implicit val conversationMetricsJF: OFormat[ConversationMetrics] = Json.format[ConversationMetrics]

@@ -16,16 +16,14 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.repo
 
-import java.time.ZonedDateTime
-
-import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Singleton}
+import com.google.inject.ImplementedBy
 import play.api.libs.json.{Format, Json, OFormat}
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
 import reactivemongo.play.json.JsObjectDocumentWriter
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model._
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, Event, MetricsConfig}
 import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -50,7 +48,7 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
 ) with MetricsRepo {
 
   private implicit val format: OFormat[ConversationMetrics] = ConversationMetrics.conversationMetricsJF
-  private implicit val formatEvent: Format[Event] = Event.EventDbJF
+  private implicit val formatEvent: Format[Event] = Event.EventJF
 
   override def indexes: Seq[Index] = Seq(
     Index(
@@ -61,7 +59,7 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
     Index(
       key = Seq("createdDate" -> IndexType.Ascending),
       name = Some("createdDate-Index"),
-      options = BSONDocument("expireAfterSeconds" -> 15L)
+      options = BSONDocument("expireAfterSeconds" -> BSONLong(metricsConfig.ttlInSeconds))
     )
   )
 

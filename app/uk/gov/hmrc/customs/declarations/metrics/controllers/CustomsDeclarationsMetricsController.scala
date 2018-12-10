@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.controllers
 
-import java.time.ZonedDateTime
 import javax.inject.{Inject, Singleton}
 
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
@@ -31,8 +30,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import play.api.libs.functional.syntax._
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
@@ -45,23 +42,12 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
   private val nonJsonBodyErrorMessage = "Request does not contain a valid JSON body"
   private def tryJsonParser: BodyParser[Try[JsValue]] = parse.tolerantText.map(text => Try(Json.parse(text)))
 
-  val dateTimeRequestRead: Reads[ZonedDateTime] = JsPath.read[String].map { zonedDateTime =>
-    ZonedDateTime.parse(zonedDateTime)
-  }
-  val eventRequestReads: Reads[Event] = (
-    (JsPath \ "eventType").read[EventType] and
-      (JsPath \ "eventStart").read[ZonedDateTime](dateTimeRequestRead) and
-      (JsPath \ "eventEnd").read[ZonedDateTime](dateTimeRequestRead)) (Event.apply _)
-  implicit val conversationMetricReads: Reads[ConversationMetric] = (
-    (JsPath \ "conversationId").read[ConversationId] and eventRequestReads
-    )(ConversationMetric.apply _)
-
   def post(): Action[Try[JsValue]] = validateHeaders(AcceptHeaderValidation).async(tryJsonParser) {
     implicit request =>
       request.body match {
 
         case Success(js) =>
-          js.validate[ConversationMetric](conversationMetricReads) match {
+          js.validate[ConversationMetric](RequestReads.conversationMetricRequestReads) match {
             case JsSuccess(requestPayload, _) =>
               logger.debug(s"Log-time endpoint called with payload $requestPayload and headers ${request.headers}")
               metricsService.process(requestPayload).map {
