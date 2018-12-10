@@ -17,13 +17,14 @@
 package uk.gov.hmrc.customs.declarations.metrics.controllers
 
 import javax.inject.{Inject, Singleton}
+
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.libs.json._
 import play.api.mvc.{Action, BodyParser}
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.errorBadRequest
 import uk.gov.hmrc.customs.api.common.controllers.{ErrorResponse, ResponseContents}
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetric
+import uk.gov.hmrc.customs.declarations.metrics.model._
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
@@ -43,11 +44,10 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
 
   def post(): Action[Try[JsValue]] = validateHeaders(AcceptHeaderValidation).async(tryJsonParser) {
     implicit request =>
-
       request.body match {
 
         case Success(js) =>
-          js.validate[ConversationMetric] match {
+          js.validate[ConversationMetric](RequestReads.conversationMetricRequestReads) match {
             case JsSuccess(requestPayload, _) =>
               logger.debug(s"Log-time endpoint called with payload $requestPayload and headers ${request.headers}")
               metricsService.process(requestPayload).map {
