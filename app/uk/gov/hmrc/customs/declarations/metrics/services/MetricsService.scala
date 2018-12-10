@@ -70,15 +70,15 @@ class MetricsService @Inject()(val logger: CdsLogger, metricsRepo: MetricsRepo, 
 
   private def validatePayload(conversationMetric: ConversationMetric): Boolean = {
     conversationMetric.event.eventType.eventTypeString.isEmpty ||
-    conversationMetric.event.eventStart.zonedDateTime.isBefore(conversationMetric.event.eventEnd.zonedDateTime)
+    conversationMetric.event.eventStart.isBefore(conversationMetric.event.eventEnd)
   }
 
   private def calculateDigitalElapsedTime(declarationEvent: Event, notificationEvent: Event): Duration ={
     calculateElapsedTime(declarationEvent.eventStart,declarationEvent.eventEnd).plus(calculateElapsedTime(notificationEvent.eventStart, notificationEvent.eventEnd))
   }
 
-  private def calculateElapsedTime(start: EventTimeStamp, end: EventTimeStamp): Duration = {
-    Duration.between(start.zonedDateTime, end.zonedDateTime)
+  private def calculateElapsedTime(start: ZonedDateTime, end: ZonedDateTime): Duration = {
+    Duration.between(start, end)
   }
 
 }
