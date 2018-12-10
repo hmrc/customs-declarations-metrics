@@ -38,6 +38,8 @@ object RequestReads {
 }
 
 object DateTimeFormats {
+  //"$date" in reads and writes used to preserve date type, part of MongoDB Extended JSON.
+  //Read more here - http://reactivemongo.org/releases/0.1x/documentation/json/overview.html#documents-and-values
   val dateTimeReads: Reads[ZonedDateTime] =
     (__ \ "$date").read[Long].map { zonedDateTime =>
       val instant = Instant.ofEpochMilli(zonedDateTime)
