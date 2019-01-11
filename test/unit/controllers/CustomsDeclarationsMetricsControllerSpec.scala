@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,13 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
       testSubmitResult(InvalidRequestAsTryJsValue) { result =>
         status(result) shouldBe BAD_REQUEST
       }
+
+      PassByNameVerifier(mockLogger, "error")
+        .withByNameParam[String]("JSON payload failed schema validation with error " +
+        "JsError(List((/conversationId,List(ValidationError(List(error.path.missing),WrappedArray()))), " +
+        "(/eventStart,List(ValidationError(List(error.path.missing),WrappedArray()))), " +
+        "(/eventEnd,List(ValidationError(List(error.path.missing),WrappedArray())))))")
+        .verify()
     }
 
     "respond with status 400 for a non well-formed JSON payload" in new SetUp() {
@@ -89,7 +96,9 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
       }
 
       PassByNameVerifier(mockLogger, "error")
-        .withByNameParam[String]("Request does not contain a valid JSON body No content to map due to end-of-input\n at [Source: ; line: 1, column: 0]")
+        .withByNameParam[String](
+          """Request does not contain a valid JSON body No content to map due to end-of-input
+            | at [Source: (String)""; line: 1, column: 0]""".stripMargin)
         .verify()
     }
 
