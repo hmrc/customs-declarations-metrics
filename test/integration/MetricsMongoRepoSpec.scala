@@ -23,9 +23,8 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import play.api.libs.json.Json
 import reactivemongo.api.DB
-import reactivemongo.play.json.JsObjectDocumentWriter
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationId, ConversationMetrics, MetricsConfig}
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetrics, MetricsConfig}
 import uk.gov.hmrc.customs.declarations.metrics.repo.{MetricsMongoRepo, MetricsRepoErrorHandler, MongoDbProvider}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
@@ -62,12 +61,8 @@ class MetricsMongoRepoSpec extends UnitSpec
     await(repository.drop)
   }
 
-  private def collectionSize: Long = {
-    await(repository.collection.count(None, None, 0, None, mongoDbProvider.mongo().connection.options.readConcern))
-  }
-
-  private def selector(conversationId: ConversationId) = {
-    Json.obj("conversationId" -> conversationId.id)
+  private def collectionSize: Int = {
+    await(repository.count(Json.obj()))
   }
 
   "repository" should {
@@ -78,7 +73,7 @@ class MetricsMongoRepoSpec extends UnitSpec
       saveResult shouldBe true
       collectionSize shouldBe 1
 
-      val findResult = await(repository.collection.find(selector(DeclarationConversationId), None).one[ConversationMetrics]).get
+      val findResult = fetchMetrics
       findResult.conversationId.id.toString shouldBe "dff783d7-44ee-4836-93d0-3242da7c225f"
       findResult.events.head.eventType.eventTypeString shouldBe "DECLARATION"
       findResult.events.head.eventStart should not be None
@@ -94,7 +89,7 @@ class MetricsMongoRepoSpec extends UnitSpec
       await(repository.updateWithFirstNotification(NotificationConversationMetric))
       collectionSize shouldBe 1
 
-      val findResult = await(repository.collection.find(selector(DeclarationConversationId), None).one[ConversationMetrics]).get
+      val findResult = fetchMetrics
       findResult.events.size shouldBe 2
       findResult.conversationId.id.toString shouldBe "dff783d7-44ee-4836-93d0-3242da7c225f"
       findResult.events.head.eventType.eventTypeString shouldBe "DECLARATION"
@@ -126,9 +121,10 @@ class MetricsMongoRepoSpec extends UnitSpec
       val caught = intercept[IllegalStateException](await(repository.updateWithFirstNotification(NotificationConversationMetric)))
       caught.getMessage shouldBe "event data not updated for ConversationMetric(dff783d7-44ee-4836-93d0-3242da7c225f,Event(EventType(NOTIFICATION),2014-10-23T00:36:14.123Z,2014-10-23T00:36:18.123Z))"
       collectionSize shouldBe 1
-      val findResult = await(repository.collection.find(selector(DeclarationConversationId), None).one[ConversationMetrics]).get
-      findResult.events.size shouldBe 2
+      fetchMetrics.events.size shouldBe 2
     }
 
   }
+
+  private def fetchMetrics: ConversationMetrics = await(repository.find("conversationId" -> DeclarationConversationId.id).head)
 }
