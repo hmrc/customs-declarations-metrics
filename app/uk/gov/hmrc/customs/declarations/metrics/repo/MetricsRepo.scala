@@ -67,7 +67,7 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
     logger.debug(s"saving conversationMetrics: $conversationMetrics")
     lazy val errorMsg = s"event data not inserted for $conversationMetrics"
 
-    collection.insert(conversationMetrics).map {
+    insert(conversationMetrics).map {
       writeResult => errorHandler.handleSaveError(writeResult, errorMsg)
     }
   }
@@ -79,7 +79,7 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
     val selector = Json.obj("conversationId" -> conversationMetric.conversationId.id, "events.1" -> Json.obj("$exists" -> false))
     val update = Json.obj("$push" -> Json.obj("events" -> conversationMetric.event))
 
-    val result: Future[ConversationMetrics] = collection.findAndUpdate(selector, update, fetchNewObject = true).map { result =>
+    val result: Future[ConversationMetrics] = findAndUpdate(selector, update, fetchNewObject = true).map { result =>
 
       if (result.lastError.isDefined && result.lastError.get.err.isDefined) {
           logger.error(s"mongo error: ${result.lastError.get.err.get}")
