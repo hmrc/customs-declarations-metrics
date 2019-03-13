@@ -27,12 +27,11 @@ import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model._
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Left
 
 @Singleton
-class MetricsService @Inject()(val logger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics) extends HasMetrics {
+class MetricsService @Inject()(val logger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics)(implicit ec: ExecutionContext) extends HasMetrics {
 
   def process(conversationMetric: ConversationMetric): Future[Either[Result, Unit]] = {
 
