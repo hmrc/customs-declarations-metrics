@@ -19,12 +19,13 @@ package unit.services
 
 import java.time.Duration
 
-import com.codahale.metrics.{Metric, MetricRegistry}
+import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
-import org.mockito.Mockito.{RETURNS_DEEP_STUBS, verify, when}
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{RETURNS_DEEP_STUBS, verify, when}
 import org.scalatest.Matchers
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorInternalServerError
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics}

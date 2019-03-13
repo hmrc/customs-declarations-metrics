@@ -29,14 +29,13 @@ import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
 class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
                                                       metricsService: MetricsService,
-                                                      val messagesApi: MessagesApi)
+                                                      val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
       extends BaseController with HeaderValidator with I18nSupport {
 
   private val nonJsonBodyErrorMessage = "Request does not contain a valid JSON body"

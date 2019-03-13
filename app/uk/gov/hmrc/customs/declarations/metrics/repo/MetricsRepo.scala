@@ -26,9 +26,7 @@ import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, Event, MetricsConfig}
 import uk.gov.hmrc.mongo.ReactiveRepository
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
+import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[MetricsMongoRepo])
 trait MetricsRepo {
@@ -41,7 +39,7 @@ trait MetricsRepo {
 class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
                                   errorHandler: MetricsRepoErrorHandler,
                                   logger: CdsLogger,
-                                  metricsConfig: MetricsConfig) extends ReactiveRepository[ConversationMetrics, BSONObjectID](
+                                  metricsConfig: MetricsConfig)(implicit ec: ExecutionContext) extends ReactiveRepository[ConversationMetrics, BSONObjectID](
   collectionName = "metrics",
   mongo = mongoDbProvider.mongo,
   domainFormat = ConversationMetrics.conversationMetricsJF

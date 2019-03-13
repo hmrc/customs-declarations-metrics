@@ -19,8 +19,9 @@ package integration
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import reactivemongo.api.DB
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
@@ -30,7 +31,6 @@ import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
 import util.TestData._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 
 class MetricsMongoRepoSpec extends UnitSpec
