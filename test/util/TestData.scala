@@ -20,29 +20,27 @@ import java.time._
 import java.util.UUID
 
 import play.api.http.MimeTypes
-import play.api.libs.json
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, AnyContentAsText, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ACCEPT, CONTENT_TYPE}
 import uk.gov.hmrc.customs.declarations.metrics.model._
-import util.TestData.NonJsonPayloadRequest
 
 import scala.util.Try
 
 object TestData {
 
-  val DeclarationEventType = EventType("DECLARATION")
-  val DeclarationConversationId = ConversationId(UUID.fromString("dff783d7-44ee-4836-93d0-3242da7c225f"))
-  val DeclarationTimeStampEntry = ZonedDateTime.parse("2014-10-23T00:35:14.123Z")
-  val DeclarationTimeStampExit = DeclarationTimeStampEntry.plusSeconds(2)
-  val DeclarationEvent = Event(DeclarationEventType, DeclarationTimeStampEntry, DeclarationTimeStampExit)
-  val DeclarationConversationMetric = ConversationMetric(DeclarationConversationId, DeclarationEvent)
+  val DeclarationEventType: EventType = EventType("DECLARATION")
+  val DeclarationConversationId: ConversationId = ConversationId(UUID.fromString("dff783d7-44ee-4836-93d0-3242da7c225f"))
+  val DeclarationTimeStampEntry: ZonedDateTime = ZonedDateTime.parse("2014-10-23T00:35:14.123Z")
+  val DeclarationTimeStampExit: ZonedDateTime = DeclarationTimeStampEntry.plusSeconds(2)
+  val DeclarationEvent: Event = Event(DeclarationEventType, DeclarationTimeStampEntry, DeclarationTimeStampExit)
+  val DeclarationConversationMetric: ConversationMetric = ConversationMetric(DeclarationConversationId, DeclarationEvent)
 
   val NotificationEventType = EventType("NOTIFICATION")
   val NotificationConversationId = ConversationId(UUID.fromString("153d8350-10df-4bd7-b6ad-636450e7fda1"))
-  val NotificationTimeStampEntry = ZonedDateTime.parse("2014-10-23T00:36:14.123Z")
-  val NotificationTimeStampExit = NotificationTimeStampEntry.plusSeconds(4)
+  val NotificationTimeStampEntry: ZonedDateTime = ZonedDateTime.parse("2014-10-23T00:36:14.123Z")
+  val NotificationTimeStampExit: ZonedDateTime = NotificationTimeStampEntry.plusSeconds(4)
   val NotificationEvent = Event(NotificationEventType, NotificationTimeStampEntry, NotificationTimeStampExit)
   val NotificationConversationMetric = ConversationMetric(DeclarationConversationId, NotificationEvent)
 

@@ -21,7 +21,6 @@ import org.mockito.Mockito.{RETURNS_DEEP_STUBS, when}
 import org.scalatest.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.MessagesApi
-import play.api.libs.json
 import play.api.libs.json.JsValue
 import play.api.mvc.{ControllerComponents, Request, Result}
 import play.api.test.Helpers
@@ -35,14 +34,14 @@ import uk.gov.hmrc.play.test.UnitSpec
 import util.MockitoPassByNameHelper.PassByNameVerifier
 import util.TestData._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
   with Matchers with MockitoSugar {
 
   trait SetUp {
-    private implicit val ec = Helpers.stubControllerComponents().executionContext
+    private implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
     val mockLogger: CdsLogger = mock[CdsLogger]
     val mockService: MetricsService = mock[MetricsService]
     val cc: ControllerComponents = stubControllerComponents()
