@@ -20,11 +20,13 @@ import java.time._
 import java.util.UUID
 
 import play.api.http.MimeTypes
+import play.api.libs.json
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, AnyContentAsText, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ACCEPT, CONTENT_TYPE}
 import uk.gov.hmrc.customs.declarations.metrics.model._
+import util.TestData.NonJsonPayloadRequest
 
 import scala.util.Try
 
@@ -91,10 +93,11 @@ object TestData {
 
   val NoAcceptHeaderRequest: FakeRequest[Try[JsValue]] = FakeRequest()
     .withHeaders(RequestHeaders.CONTENT_TYPE_HEADER).withBody(Try(ValidJson))
-
-  val ValidRequestAsTryJsValue: Request[Try[JsValue]] = ValidRequest.copyFakeRequest[Try[JsValue]](body = Try(ValidRequest.body.json))
-  val InvalidRequestAsTryJsValue: Request[Try[JsValue]] = InvalidRequest.copyFakeRequest[Try[JsValue]](body = Try(InvalidRequest.body.json))
+  
+  val ValidRequestAsTryJsValue: Request[Try[JsValue]] = ValidRequest.withBody(body = Try(ValidRequest.body.json))
+  val InvalidRequestAsTryJsValue: Request[Try[JsValue]] = InvalidRequest.withBody(body = Try(InvalidRequest.body.json))
   val NonJsonPayloadRequest: FakeRequest[AnyContentAsText] = ValidRequest.withTextBody(NonJsonPayload)
+  val NoJsonPayloadRequest: FakeRequest[Try[JsValue]] = NonJsonPayloadRequest.withBody(body = Try(Json.parse("")))
 
 }
 

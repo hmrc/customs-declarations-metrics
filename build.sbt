@@ -97,9 +97,8 @@ lazy val playPublishingSettings: Seq[sbt.Setting[_]] = sbtrelease.ReleasePlugin.
 lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   coverageExcludedPackages := List(
     "<empty>"
-    ,"Reverse.*"
     ,"uk\\.gov\\.hmrc\\.customs\\.declarations\\.metrics\\.model\\..*"
-    ,".*(BuildInfo|Routes).*"
+    ,".*(Reverse|BuildInfo|Routes).*"
   ).mkString(";"),
   coverageMinimum := 90,
   coverageFailOnMinimum := true,

@@ -25,7 +25,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{RETURNS_DEEP_STUBS, verify, when}
 import org.scalatest.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.test.Helpers
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorInternalServerError
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics}
@@ -48,6 +48,7 @@ class MetricsServiceSpec extends UnitSpec
   }
 
   trait SetUp {
+    private implicit val ec = Helpers.stubControllerComponents().executionContext
     val mockMetrics = mock[Metrics]
     val mockLogger = mock[CdsLogger]
     val mockRepo = mock[MetricsRepo]

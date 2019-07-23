@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.controllers
 
-import play.api.http.{FileMimeTypes, HeaderNames, MimeTypes}
-import play.api.i18n.{Langs, MessagesApi}
+import play.api.http.{HeaderNames, MimeTypes}
 import play.api.mvc._
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorAcceptHeaderInvalid
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger

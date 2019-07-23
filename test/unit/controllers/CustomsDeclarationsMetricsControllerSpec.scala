@@ -24,6 +24,7 @@ import play.api.i18n.MessagesApi
 import play.api.libs.json
 import play.api.libs.json.JsValue
 import play.api.mvc.{ControllerComponents, Request, Result}
+import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
@@ -33,7 +34,6 @@ import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
 import uk.gov.hmrc.play.test.UnitSpec
 import util.MockitoPassByNameHelper.PassByNameVerifier
 import util.TestData._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -42,6 +42,7 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
   with Matchers with MockitoSugar {
 
   trait SetUp {
+    private implicit val ec = Helpers.stubControllerComponents().executionContext
     val mockLogger: CdsLogger = mock[CdsLogger]
     val mockService: MetricsService = mock[MetricsService]
     val cc: ControllerComponents = stubControllerComponents()
@@ -92,7 +93,7 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
     }
 
     "respond with status 400 for a non well-formed JSON payload" in new SetUp() {
-      testSubmitResult(NonJsonPayloadRequest.copyFakeRequest(body = Try(json.Json.parse("")))) { result =>
+      testSubmitResult(NoJsonPayloadRequest) { result =>
         status(result) shouldBe BAD_REQUEST
         await(result) shouldBe wrongPayloadErrorResult
       }
