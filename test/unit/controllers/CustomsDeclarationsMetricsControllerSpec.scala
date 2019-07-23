@@ -23,7 +23,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.MessagesApi
 import play.api.libs.json
 import play.api.libs.json.JsValue
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{ControllerComponents, Request, Result}
 import play.api.test.Helpers._
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
@@ -33,8 +33,8 @@ import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
 import uk.gov.hmrc.play.test.UnitSpec
 import util.MockitoPassByNameHelper.PassByNameVerifier
 import util.TestData._
-
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
 import scala.concurrent.Future
 import scala.util.Try
 
@@ -42,10 +42,11 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
   with Matchers with MockitoSugar {
 
   trait SetUp {
-    val mockLogger = mock[CdsLogger]
-    val mockService = mock[MetricsService]
-    val mockMessagesApi = mock[MessagesApi](RETURNS_DEEP_STUBS)
-    val controller = new CustomsDeclarationsMetricsController(mockLogger, mockService, mockMessagesApi) {}
+    val mockLogger: CdsLogger = mock[CdsLogger]
+    val mockService: MetricsService = mock[MetricsService]
+    val cc: ControllerComponents = stubControllerComponents()
+    val mockMessagesApi: MessagesApi = mock[MessagesApi](RETURNS_DEEP_STUBS)
+    val controller: CustomsDeclarationsMetricsController = new CustomsDeclarationsMetricsController(mockLogger, mockService, cc, mockMessagesApi) {}
 
     def testSubmitResult(request: Request[Try[JsValue]])(test: Future[Result] => Unit) {
       test(controller.post().apply(request))
@@ -84,9 +85,9 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
 
       PassByNameVerifier(mockLogger, "error")
         .withByNameParam[String]("JSON payload failed schema validation with error " +
-        "JsError(List((/conversationId,List(ValidationError(List(error.path.missing),WrappedArray()))), " +
-        "(/eventStart,List(ValidationError(List(error.path.missing),WrappedArray()))), " +
-        "(/eventEnd,List(ValidationError(List(error.path.missing),WrappedArray())))))")
+        "JsError(List((/conversationId,List(JsonValidationError(List(error.path.missing),WrappedArray()))), " +
+        "(/eventStart,List(JsonValidationError(List(error.path.missing),WrappedArray()))), " +
+        "(/eventEnd,List(JsonValidationError(List(error.path.missing),WrappedArray())))))")
         .verify()
     }
 

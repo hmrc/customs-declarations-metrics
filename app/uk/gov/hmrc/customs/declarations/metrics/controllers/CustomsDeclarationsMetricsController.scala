@@ -17,17 +17,16 @@
 package uk.gov.hmrc.customs.declarations.metrics.controllers
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.json._
-import play.api.mvc.{Action, BodyParser}
+import play.api.mvc.{Action, BodyParser, ControllerComponents}
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.errorBadRequest
 import uk.gov.hmrc.customs.api.common.controllers.{ErrorResponse, ResponseContents}
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model._
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -35,13 +34,14 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
                                                       metricsService: MetricsService,
-                                                      val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
-      extends BaseController with HeaderValidator with I18nSupport {
+                                                      cc: ControllerComponents,
+                                                      override val messagesApi: MessagesApi)(implicit ec: ExecutionContext)
+      extends BackendController(cc) with HeaderValidator with I18nSupport {
 
   private val nonJsonBodyErrorMessage = "Request does not contain a valid JSON body"
   private def tryJsonParser: BodyParser[Try[JsValue]] = parse.tolerantText.map(text => Try(Json.parse(text)))
 
-  def post(): Action[Try[JsValue]] = validateHeaders(AcceptHeaderValidation).async(tryJsonParser) {
+  def post(): Action[Try[JsValue]] = validateHeaders(AcceptHeaderValidation, cc).async(tryJsonParser) {
     implicit request =>
       request.body match {
 
@@ -54,6 +54,7 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
                 case Left(errorResult) => errorResult
               }
             case error: JsError =>
+              println(s"JSON payload failed schema validation with error $error")
               logger.error(s"JSON payload failed schema validation with error $error")
               Future.successful(invalidJsonErrorResponse(error).JsonResult)
           }

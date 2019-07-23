@@ -16,23 +16,24 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.controllers
 
-import play.api.http.{HeaderNames, MimeTypes}
-import play.api.mvc.{ActionBuilder, Request, Result, Results}
+import play.api.http.{FileMimeTypes, HeaderNames, MimeTypes}
+import play.api.i18n.{Langs, MessagesApi}
+import play.api.mvc._
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorAcceptHeaderInvalid
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait HeaderValidator extends Results {
 
   private lazy val validAcceptHeaders = Seq("application/vnd.hmrc.1.0+json", MimeTypes.JSON)
 
-  val AcceptHeaderValidation: (Option[String] => Boolean) = _ exists (validAcceptHeaders.contains(_))
+  val AcceptHeaderValidation: Option[String] => Boolean = _ exists (validAcceptHeaders.contains(_))
 
   protected val logger: CdsLogger
 
-  def validateHeaders(rules: Option[String] => Boolean): ActionBuilder[Request] = new ActionBuilder[Request] {
-    def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
+  def validateHeaders(rules: Option[String] => Boolean, controllerComponents: ControllerComponents): ActionBuilder[Request, AnyContent] = new ActionBuilder[Request, AnyContent] {
+    def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
       val logMessage = "Received log-time request"
       val headers = request.headers.headers
       logger.debug(s"$logMessage with headers $headers")
@@ -48,5 +49,9 @@ trait HeaderValidator extends Results {
         Future.successful(ErrorAcceptHeaderInvalid.JsonResult)
       }
     }
+
+    override def parser: BodyParser[AnyContent] = controllerComponents.parsers.defaultBodyParser
+
+    override protected def executionContext: ExecutionContext = controllerComponents.executionContext
   }
 }
