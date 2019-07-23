@@ -54,7 +54,6 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
                 case Left(errorResult) => errorResult
               }
             case error: JsError =>
-              println(s"JSON payload failed schema validation with error $error")
               logger.error(s"JSON payload failed schema validation with error $error")
               Future.successful(invalidJsonErrorResponse(error).JsonResult)
           }
