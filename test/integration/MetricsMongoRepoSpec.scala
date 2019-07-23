@@ -21,8 +21,8 @@ import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
+import play.api.test.Helpers
 import reactivemongo.api.DB
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetrics, MetricsConfig}
@@ -42,6 +42,7 @@ class MetricsMongoRepoSpec extends UnitSpec
   private val mockLogger = mock[CdsLogger]
   private val mockErrorHandler = mock[MetricsRepoErrorHandler]
   private val mockMetricsConfig = mock[MetricsConfig]
+  private implicit val ec = Helpers.stubControllerComponents().executionContext
 
   val twoWeeksInSeconds = 1209600
 

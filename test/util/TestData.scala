@@ -30,17 +30,17 @@ import scala.util.Try
 
 object TestData {
 
-  val DeclarationEventType = EventType("DECLARATION")
-  val DeclarationConversationId = ConversationId(UUID.fromString("dff783d7-44ee-4836-93d0-3242da7c225f"))
-  val DeclarationTimeStampEntry = ZonedDateTime.parse("2014-10-23T00:35:14.123Z")
-  val DeclarationTimeStampExit = DeclarationTimeStampEntry.plusSeconds(2)
-  val DeclarationEvent = Event(DeclarationEventType, DeclarationTimeStampEntry, DeclarationTimeStampExit)
-  val DeclarationConversationMetric = ConversationMetric(DeclarationConversationId, DeclarationEvent)
+  val DeclarationEventType: EventType = EventType("DECLARATION")
+  val DeclarationConversationId: ConversationId = ConversationId(UUID.fromString("dff783d7-44ee-4836-93d0-3242da7c225f"))
+  val DeclarationTimeStampEntry: ZonedDateTime = ZonedDateTime.parse("2014-10-23T00:35:14.123Z")
+  val DeclarationTimeStampExit: ZonedDateTime = DeclarationTimeStampEntry.plusSeconds(2)
+  val DeclarationEvent: Event = Event(DeclarationEventType, DeclarationTimeStampEntry, DeclarationTimeStampExit)
+  val DeclarationConversationMetric: ConversationMetric = ConversationMetric(DeclarationConversationId, DeclarationEvent)
 
   val NotificationEventType = EventType("NOTIFICATION")
   val NotificationConversationId = ConversationId(UUID.fromString("153d8350-10df-4bd7-b6ad-636450e7fda1"))
-  val NotificationTimeStampEntry = ZonedDateTime.parse("2014-10-23T00:36:14.123Z")
-  val NotificationTimeStampExit = NotificationTimeStampEntry.plusSeconds(4)
+  val NotificationTimeStampEntry: ZonedDateTime = ZonedDateTime.parse("2014-10-23T00:36:14.123Z")
+  val NotificationTimeStampExit: ZonedDateTime = NotificationTimeStampEntry.plusSeconds(4)
   val NotificationEvent = Event(NotificationEventType, NotificationTimeStampEntry, NotificationTimeStampExit)
   val NotificationConversationMetric = ConversationMetric(DeclarationConversationId, NotificationEvent)
 
@@ -91,10 +91,11 @@ object TestData {
 
   val NoAcceptHeaderRequest: FakeRequest[Try[JsValue]] = FakeRequest()
     .withHeaders(RequestHeaders.CONTENT_TYPE_HEADER).withBody(Try(ValidJson))
-
-  val ValidRequestAsTryJsValue: Request[Try[JsValue]] = ValidRequest.copyFakeRequest[Try[JsValue]](body = Try(ValidRequest.body.json))
-  val InvalidRequestAsTryJsValue: Request[Try[JsValue]] = InvalidRequest.copyFakeRequest[Try[JsValue]](body = Try(InvalidRequest.body.json))
+  
+  val ValidRequestAsTryJsValue: Request[Try[JsValue]] = ValidRequest.withBody(body = Try(ValidRequest.body.json))
+  val InvalidRequestAsTryJsValue: Request[Try[JsValue]] = InvalidRequest.withBody(body = Try(InvalidRequest.body.json))
   val NonJsonPayloadRequest: FakeRequest[AnyContentAsText] = ValidRequest.withTextBody(NonJsonPayload)
+  val NoJsonPayloadRequest: FakeRequest[Try[JsValue]] = NonJsonPayloadRequest.withBody(body = Try(Json.parse("")))
 
 }
 
