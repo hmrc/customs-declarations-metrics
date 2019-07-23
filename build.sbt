@@ -1,6 +1,4 @@
 import AppDependencies._
-import org.scalastyle.sbt.ScalastylePlugin._
-import play.sbt.routes.RoutesKeys._
 import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
 import sbt._
