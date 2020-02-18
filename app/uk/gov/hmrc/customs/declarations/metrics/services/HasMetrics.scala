@@ -25,7 +25,7 @@ import com.codahale.metrics.MetricRegistry
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 
 trait HasMetrics {
-  
+
   type Metric = String
   def metrics: Metrics
   val logger: CdsLogger
