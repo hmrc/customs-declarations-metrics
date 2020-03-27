@@ -48,17 +48,26 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
   private implicit val format: OFormat[ConversationMetrics] = ConversationMetrics.conversationMetricsJF
   private implicit val formatEvent: Format[Event] = Event.EventJF
 
+  private val ttlIndexName = "createdDate-Index"
+  private val ttlInSeconds = metricsConfig.ttlInSeconds
+  private val ttlIndex = Index(
+    key = Seq("createdAt" -> IndexType.Descending),
+    name = Some(ttlIndexName),
+    unique = false,
+    options = BSONDocument("expireAfterSeconds" -> ttlInSeconds)
+  )
+
+  dropInvalidIndexes.flatMap { _ =>
+    collection.indexesManager.ensure(ttlIndex)
+  }
+
   override def indexes: Seq[Index] = Seq(
     Index(
       key = Seq("conversationId" -> IndexType.Ascending),
       name = Some("conversationId-Index"),
       unique = true
     ),
-    Index(
-      key = Seq("createdDate" -> IndexType.Ascending),
-      name = Some("createdDate-Index"),
-      options = BSONDocument("expireAfterSeconds" -> BSONLong(metricsConfig.ttlInSeconds))
-    )
+    ttlIndex
   )
 
   override def save(conversationMetrics: ConversationMetrics): Future[Boolean] = {
@@ -92,4 +101,17 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
     result
   }
 
+  private def dropInvalidIndexes: Future[_] =
+    collection.indexesManager.list().flatMap { indexes =>
+      indexes
+        .find { index =>
+          index.name.contains(ttlIndexName) &&
+            !index.options.getAs[Int]("expireAfterSeconds").contains(ttlInSeconds)
+        }
+        .map { _ =>
+          logger.debug(s"dropping $ttlIndexName index as ttl value is incorrect")
+          collection.indexesManager.drop(ttlIndexName)
+        }
+        .getOrElse(Future.successful(()))
+    }
 }
