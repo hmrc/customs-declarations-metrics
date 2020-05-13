@@ -25,7 +25,7 @@ import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.MetricsConfig
 import uk.gov.hmrc.customs.declarations.metrics.services.ConfigService
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
-import uk.gov.hmrc.play.test.UnitSpec
+import util.UnitSpec
 
 import scala.language.postfixOps
 

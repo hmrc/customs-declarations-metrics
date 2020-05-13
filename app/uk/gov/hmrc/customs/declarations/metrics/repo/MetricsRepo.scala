@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.repo
 
-import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{Format, Json, OFormat}
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.JsObjectDocumentWriter
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, Event, MetricsConfig}

@@ -30,7 +30,7 @@ import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController
 import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetric
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
-import uk.gov.hmrc.play.test.UnitSpec
+import util.UnitSpec
 import util.MockitoPassByNameHelper.PassByNameVerifier
 import util.TestData._
 
