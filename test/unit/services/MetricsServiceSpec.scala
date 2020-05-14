@@ -31,7 +31,7 @@ import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 import uk.gov.hmrc.customs.declarations.metrics.services.{HasMetrics, MetricsService}
-import uk.gov.hmrc.play.test.UnitSpec
+import util.UnitSpec
 import util.TestData.{ConversationMetrics1, DeclarationConversationMetric, NotificationConversationMetric}
 
 import scala.concurrent.Future
