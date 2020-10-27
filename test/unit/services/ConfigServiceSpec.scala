@@ -19,12 +19,12 @@ package unit.services
 import com.typesafe.config.{Config, ConfigFactory}
 import org.scalatest.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.{Configuration, Mode}
+import play.api.Configuration
 import uk.gov.hmrc.customs.api.common.config.ConfigValidatedNelAdaptor
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.MetricsConfig
 import uk.gov.hmrc.customs.declarations.metrics.services.ConfigService
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import util.UnitSpec
 
 import scala.language.postfixOps
@@ -40,7 +40,7 @@ class ConfigServiceSpec extends UnitSpec with MockitoSugar with Matchers {
 
   private val emptyAppConfig: Config = ConfigFactory.parseString("")
 
-  private def testServicesConfig(configuration: Configuration) = new ServicesConfig(configuration, new RunMode(configuration, Mode.Test))
+  private def testServicesConfig(configuration: Configuration) = new ServicesConfig(configuration)
 
   private val validServicesConfig = new Configuration(validAppConfig)
   private val emptyServicesConfig = new Configuration(emptyAppConfig)
