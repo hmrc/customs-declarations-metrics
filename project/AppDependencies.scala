@@ -6,8 +6,8 @@ object AppDependencies {
   private val mockitoVersion = "3.5.9"
   private val wireMockVersion = "2.27.2"
   private val customsApiCommonVersion = "1.53.0"
-  private val simpleReactiveMongoVersion = "7.30.0-play-26"
-  private val reactiveMongoTestVersion = "4.21.0-play-26"
+  private val simpleReactiveMongoVersion = "7.30.0-play-27"
+  private val reactiveMongoTestVersion = "4.21.0-play-27"
   private val testScope = "test,it"
 
   val scalaTestPlusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % scalatestplusVersion % testScope
