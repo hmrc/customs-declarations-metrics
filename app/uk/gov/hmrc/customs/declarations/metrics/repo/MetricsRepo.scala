@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,17 @@ import scala.concurrent.{ExecutionContext, Future}
 trait MetricsRepo {
 
   def save(conversationMetrics: ConversationMetrics): Future[Boolean]
+
   def updateWithFirstNotification(conversationMetric: ConversationMetric): Future[ConversationMetrics]
+
+  def deleteAll(): Future[Unit]
 }
 
 @Singleton
-class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
-                                  errorHandler: MetricsRepoErrorHandler,
-                                  logger: CdsLogger,
-                                  metricsConfig: MetricsConfig)(implicit ec: ExecutionContext) extends ReactiveRepository[ConversationMetrics, BSONObjectID](
+class MetricsMongoRepo @Inject()(mongoDbProvider: MongoDbProvider,
+                                 errorHandler: MetricsRepoErrorHandler,
+                                 logger: CdsLogger,
+                                 metricsConfig: MetricsConfig)(implicit ec: ExecutionContext) extends ReactiveRepository[ConversationMetrics, BSONObjectID](
   collectionName = "metrics",
   mongo = mongoDbProvider.mongo,
   domainFormat = ConversationMetrics.conversationMetricsJF
@@ -89,8 +92,8 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
     val result: Future[ConversationMetrics] = findAndUpdate(selector, update, fetchNewObject = true).map { result =>
 
       if (result.lastError.isDefined && result.lastError.get.err.isDefined) {
-          logger.error(s"mongo error: ${result.lastError.get.err.get}")
-          throw new IllegalStateException(errorMsg)
+        logger.error(s"mongo error: ${result.lastError.get.err.get}")
+        throw new IllegalStateException(errorMsg)
       } else {
         result.result[ConversationMetrics].getOrElse({
           logger.debug(errorMsg)
@@ -114,4 +117,13 @@ class MetricsMongoRepo @Inject() (mongoDbProvider: MongoDbProvider,
         }
         .getOrElse(Future.successful(()))
     }
+
+  override def deleteAll(): Future[Unit] = {
+    logger.debug(s"deleting all metrics")
+
+    removeAll().map { result =>
+      logger.debug(s"deleted ${result.n} metrics")
+    }
+  }
+
 }
