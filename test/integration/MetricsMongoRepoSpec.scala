@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetrics, MetricsConfig}
 import uk.gov.hmrc.customs.declarations.metrics.repo.{MetricsMongoRepo, MetricsRepoErrorHandler, MongoDbProvider}
 import uk.gov.hmrc.mongo.MongoSpecSupport
-import util.UnitSpec
 import util.TestData._
+import util.UnitSpec
 
 import scala.language.postfixOps
 
@@ -37,7 +37,8 @@ class MetricsMongoRepoSpec extends UnitSpec
   with BeforeAndAfterAll
   with BeforeAndAfterEach
   with MockitoSugar
-  with MongoSpecSupport  { self =>
+  with MongoSpecSupport {
+  self =>
 
   private val mockLogger = mock[CdsLogger]
   private val mockErrorHandler = mock[MetricsRepoErrorHandler]
@@ -123,6 +124,14 @@ class MetricsMongoRepoSpec extends UnitSpec
       caught.getMessage shouldBe "event data not updated for ConversationMetric(dff783d7-44ee-4836-93d0-3242da7c225f,Event(EventType(NOTIFICATION),2014-10-23T00:36:14.123Z,2014-10-23T00:36:18.123Z))"
       collectionSize shouldBe 1
       fetchMetrics.events.size shouldBe 2
+    }
+
+    "successfully delete all metrics" in  {
+      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
+      await(repository.save(ConversationMetricsWithDeclarationEventOnly))
+      await(repository.updateWithFirstNotification(NotificationConversationMetric))
+      await(repository.deleteAll())
+      collectionSize shouldBe 0
     }
 
   }
