@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.customs.declarations.metrics.config
+package uk.gov.hmrc.customs.declarations.metrics.services
 
-import com.google.inject.AbstractModule
-import uk.gov.hmrc.customs.declarations.metrics.model.MetricsConfig
-import uk.gov.hmrc.customs.declarations.metrics.services.ConfigService
+import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 
-class ConfigModule extends AbstractModule {
+@Singleton
+class TestOnlyService @Inject() (metricsRepo: MetricsRepo) {
 
-  override def configure(): Unit = {
-    // asEagerSingleton forces evaluation at application startup time
-    bind(classOf[MetricsConfig]).to(classOf[ConfigService]).asEagerSingleton()
+  def deleteAll(): Unit = {
+    metricsRepo.deleteAll()
   }
-
 }
