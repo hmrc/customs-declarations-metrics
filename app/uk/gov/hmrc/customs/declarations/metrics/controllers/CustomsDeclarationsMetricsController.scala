@@ -25,9 +25,7 @@ import uk.gov.hmrc.customs.api.common.controllers.{ErrorResponse, ResponseConten
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model._
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
@@ -64,7 +62,7 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
       }
   }
 
-  private def invalidJsonErrorResponse(jsError: JsError)(implicit messages: Messages, hc: HeaderCarrier): ErrorResponse = {
+  private def invalidJsonErrorResponse(jsError: JsError)(implicit messages: Messages): ErrorResponse = {
     val contents = for {
       (jsPath, validationErrors) <- jsError.errors
       validationError <- validationErrors

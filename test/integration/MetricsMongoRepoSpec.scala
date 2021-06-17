@@ -31,8 +31,6 @@ import uk.gov.hmrc.mongo.MongoSpecSupport
 import util.TestData._
 import util.UnitSpec
 
-import scala.language.postfixOps
-
 class MetricsMongoRepoSpec extends UnitSpec
   with BeforeAndAfterAll
   with BeforeAndAfterEach

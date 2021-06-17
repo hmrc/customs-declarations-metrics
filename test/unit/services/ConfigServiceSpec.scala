@@ -27,8 +27,6 @@ import uk.gov.hmrc.customs.declarations.metrics.services.ConfigService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import util.UnitSpec
 
-import scala.language.postfixOps
-
 class ConfigServiceSpec extends UnitSpec with MockitoSugar with Matchers {
 
   private val validAppConfig: Config = ConfigFactory.parseString(
