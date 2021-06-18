@@ -17,7 +17,7 @@
 package unit.repo
 
 import org.scalatestplus.mockito.MockitoSugar
-import reactivemongo.api.commands.{DefaultWriteResult, WriteConcernError, WriteError}
+import reactivemongo.api.commands.{UpdateWriteResult, WriteConcernError, WriteError}
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepoErrorHandler
 import util.UnitSpec
@@ -82,13 +82,15 @@ class MetricsRepoErrorHandlerSpec extends UnitSpec with MockitoSugar {
 
   private def writeResult(alteredRecords: Int, writeErrors: Seq[WriteError] = Nil,
                           writeConcernError: Option[WriteConcernError] = None) = {
-    DefaultWriteResult(
+    UpdateWriteResult(
       ok = true,
       n = alteredRecords,
       writeErrors = writeErrors,
       writeConcernError = writeConcernError,
       code = None,
-      errmsg = None)
+      errmsg = None,
+      nModified = 1,
+      upserted = Seq.empty)
   }
 
 }
