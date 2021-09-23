@@ -1,4 +1,3 @@
-import AppDependencies._
 import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
 import sbt._
@@ -9,7 +8,6 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import scala.language.postfixOps
 
 name := "customs-declarations-metrics"
-scalaVersion := "2.12.13"
 targetJvm := "jvm-1.8"
 
 lazy val CdsIntegrationComponentTest = config("it") extend Test
@@ -30,6 +28,7 @@ lazy val microservice = (project in file("."))
   .enablePlugins(SbtDistributablesPlugin)
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
   .configs(testConfig: _*)
+  .settings(scalaVersion := "2.12.14")
   .settings(
     commonSettings,
     unitTestSettings,
@@ -80,10 +79,6 @@ def unitTestFilter(name: String): Boolean = name startsWith "unit"
 
 scalastyleConfig := baseDirectory.value / "project" / "scalastyle-config.xml"
 
-val compileDependencies = Seq(customsApiCommon, simpleReactiveMongo, silencerLib, silencerPlugin)
-
-val testDependencies = Seq(scalaTestPlusPlay, wireMock, mockito,  customsApiCommonTests, reactiveMongoTest)
-
 Compile / unmanagedResourceDirectories += baseDirectory.value / "public"
 
-libraryDependencies ++= compileDependencies ++ testDependencies
+libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test

@@ -17,8 +17,6 @@
 package unit.services
 
 import com.typesafe.config.{Config, ConfigFactory}
-import org.scalatest.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration
 import uk.gov.hmrc.customs.api.common.config.ConfigValidatedNelAdaptor
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
@@ -27,7 +25,7 @@ import uk.gov.hmrc.customs.declarations.metrics.services.ConfigService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import util.UnitSpec
 
-class ConfigServiceSpec extends UnitSpec with MockitoSugar with Matchers {
+class ConfigServiceSpec extends UnitSpec {
 
   private val validAppConfig: Config = ConfigFactory.parseString(
     s"""
