@@ -16,7 +16,9 @@
 
 package component
 
-import org.scalatest.{Matchers, OptionValues, _}
+import org.scalatest.featurespec.AnyFeatureSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc._
 import play.api.test.Helpers._
@@ -28,7 +30,7 @@ import util.TestData.{InvalidDateTimeStampRequest, ValidRequest}
 
 import scala.concurrent.Future
 
-class MetricsSpec extends FeatureSpec
+class MetricsSpec extends AnyFeatureSpec
   with GivenWhenThen
   with GuiceOneAppPerSuite
   with BeforeAndAfterEach
@@ -50,9 +52,9 @@ class MetricsSpec extends FeatureSpec
     await(repo.drop)
   }
 
-  feature("Record time stamps in metrics service") {
+  Feature("Record time stamps in metrics service") {
 
-    scenario("Valid Declaration Metric is received") {
+    Scenario("Valid Declaration Metric is received") {
 
       Given("the API is available")
 
@@ -70,7 +72,7 @@ class MetricsSpec extends FeatureSpec
     }
 
 
-    scenario("invalid Declaration Metric is received") {
+    Scenario("invalid Declaration Metric is received") {
 
       Given("the API is available")
 

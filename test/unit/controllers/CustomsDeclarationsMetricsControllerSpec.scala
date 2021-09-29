@@ -18,8 +18,6 @@ package unit.controllers
 
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{RETURNS_DEEP_STUBS, when}
-import org.scalatest.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.MessagesApi
 import play.api.libs.json.JsValue
 import play.api.mvc.{ControllerComponents, Request, Result}
@@ -37,8 +35,7 @@ import util.TestData._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class CustomsDeclarationsMetricsControllerSpec extends UnitSpec
-  with Matchers with MockitoSugar {
+class CustomsDeclarationsMetricsControllerSpec extends UnitSpec {
 
   trait SetUp {
     private implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext

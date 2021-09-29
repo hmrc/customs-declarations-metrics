@@ -23,8 +23,6 @@ import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{RETURNS_DEEP_STUBS, verify, when}
-import org.scalatest.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.Helpers
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorInternalServerError
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
@@ -36,8 +34,7 @@ import util.TestData.{ConversationMetrics1, DeclarationConversationMetric, Notif
 
 import scala.concurrent.Future
 
-class MetricsServiceSpec extends UnitSpec
-  with Matchers with MockitoSugar {
+class MetricsServiceSpec extends UnitSpec {
 
   trait FakeHasMetrics extends HasMetrics{
    var recordTimeArgumentCaptor = scala.collection.immutable.Map[String, Duration]()
@@ -88,7 +85,7 @@ class MetricsServiceSpec extends UnitSpec
       service.recordTimeArgumentCaptor("declaration-digital-total").toMillis shouldBe 6000
 
       verify(mockRepo).updateWithFirstNotification(any[ConversationMetric])
-      await(result) shouldBe Right(())
+      result shouldBe Right(())
     }
 
     "save a notification metric throws an Exception when update fails " in new SetUp() {

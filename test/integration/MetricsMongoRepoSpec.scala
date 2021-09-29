@@ -134,5 +134,5 @@ class MetricsMongoRepoSpec extends UnitSpec
 
   }
 
-  private def fetchMetrics: ConversationMetrics = await(repository.find("conversationId" -> DeclarationConversationId.id).head)
+  private def fetchMetrics: ConversationMetrics = await(repository.find("conversationId" -> DeclarationConversationId.id)).head
 }

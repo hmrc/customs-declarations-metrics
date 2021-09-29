@@ -16,13 +16,12 @@
 
 package unit.repo
 
-import org.scalatestplus.mockito.MockitoSugar
 import reactivemongo.api.commands.{UpdateWriteResult, WriteConcernError, WriteError}
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepoErrorHandler
 import util.UnitSpec
 
-class MetricsRepoErrorHandlerSpec extends UnitSpec with MockitoSugar {
+class MetricsRepoErrorHandlerSpec extends UnitSpec {
 
   private val mockLogger = mock[CdsLogger]
   private val errorHandler = new MetricsRepoErrorHandler(mockLogger)
