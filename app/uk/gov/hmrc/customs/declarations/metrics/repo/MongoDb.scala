@@ -14,20 +14,3 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.customs.declarations.metrics.repo
-
-import javax.inject.Singleton
-
-import com.google.inject.{ImplementedBy, Inject}
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.DB
-
-@ImplementedBy(classOf[MongoDb])
-trait MongoDbProvider {
-  def mongo: () => DB
-}
-
-@Singleton
-class MongoDb @Inject()(reactiveMongoComponent: ReactiveMongoComponent)  extends MongoDbProvider {
-  override val mongo: () => DB = reactiveMongoComponent.mongoConnector.db
-}
