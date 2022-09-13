@@ -19,16 +19,16 @@ package uk.gov.hmrc.customs.declarations.metrics.repo
 import com.google.inject.ImplementedBy
 import org.mongodb.scala.Document
 import org.mongodb.scala.model.Updates.push
-import org.mongodb.scala.model.{IndexModel, IndexOptions, Indexes}
+import org.mongodb.scala.model.{FindOneAndUpdateOptions, IndexModel, IndexOptions, Indexes, ReturnDocument}
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{Format, OFormat}
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, Event, MetricsConfig}
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, MetricsConfig}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import org.mongodb.scala._
 import org.mongodb.scala.model.Filters._
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[MetricsMongoRepo])
@@ -60,32 +60,11 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
       IndexOptions()
         .name("createdDate-Index")
         .unique(false)
-        .expireAfter(metricsConfig.ttlInSeconds, java.util.concurrent.TimeUnit.SECONDS)
+        .expireAfter(metricsConfig.ttlInSeconds, TimeUnit.SECONDS)
 
     )
   )
 ) with MetricsRepo {
-
-  private implicit val format: OFormat[ConversationMetrics] = ConversationMetrics.conversationMetricsJF
-  private implicit val formatEvent: Format[Event] = Event.EventJF
-
-  private val ttlIndexName = "createdDate-Index"
-  private val ttlInSeconds = metricsConfig.ttlInSeconds
-    private val ttlIndex = IndexModel(
-      Indexes.descending("createdAt"),
-      IndexOptions()
-        .name(ttlIndexName)
-        .unique(false)
-        .expireAfter(ttlInSeconds, java.util.concurrent.TimeUnit.SECONDS)
-    )
-
-
-//    dropInvalidIndexes.flatMap { _ =>
-////      collection.indexesManager.ensure(ttlIndex)
-//
-//      collection.listIndexes().toFuture().
-//    }
-
 
   override def save(conversationMetrics: ConversationMetrics): Future[Boolean] = {
     logger.debug(s"saving conversationMetrics: $conversationMetrics")
@@ -95,8 +74,7 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
 
       val errorMsg1 = s"$errorMsg"
       logger.error(errorMsg1)
-      throw new RuntimeException(errorMsg1)
-      //              throw new IllegalStateException(errorMsg1)
+      throw new IllegalStateException(errorMsg1)
     }
   }
 
@@ -109,41 +87,15 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
 
     val update =  push("events", conversationMetric.event)
 
-//    val result: Future[ConversationMetrics] = findAndUpdate(selector, update, fetchNewObject = true).map { result =>
-
-    val result= collection.findOneAndUpdate(filter = selector, update = update).toFuture()
-//      .map{result =>
-//      if (result.lastError.isDefined && result.lastError.get.err.isDefined) {
-//        logger.error(s"mongo error: ${result.lastError.get.err.get}")
-//        throw new IllegalStateException(errorMsg)
-//      } else {
-//        result.result[ConversationMetrics].getOrElse({
-//          logger.debug(errorMsg)
-//          throw new IllegalStateException(errorMsg)
-//        })
-//      }
-//    }
-
+    val result= collection.findOneAndUpdate(filter = selector, update = update,
+      options = FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER)).toFuture()
    result.recover {
      logger.error(s"mongo error: findOneAndUpdate failed")
+     logger.debug(errorMsg)
      throw new IllegalStateException(errorMsg)
    }
 
   }
-
-  private def dropInvalidIndexes: Future[_] =
-    collection.listIndexes.toFuture.map( indexes =>
-      indexes
-        .find { index =>
-          index.get("name").contains(ttlIndexName) &&
-            !index.get("expireAfterSeconds").contains(ttlInSeconds)
-        }
-        .map { _ =>
-          logger.debug(s"dropping $ttlIndexName index as ttl value is incorrect")
-          collection.dropIndex(ttlIndexName)
-        }
-        .getOrElse(Future.successful(())))
-
 
   override def deleteAll(): Future[Unit] = {
     logger.debug(s"deleting all metrics")
