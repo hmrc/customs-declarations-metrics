@@ -20,13 +20,15 @@ import com.google.inject.ImplementedBy
 import org.mongodb.scala.Document
 import org.mongodb.scala.model.Updates.push
 import org.mongodb.scala.model.{FindOneAndUpdateOptions, IndexModel, IndexOptions, Indexes, ReturnDocument}
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, MetricsConfig}
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, Event, MetricsConfig}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import org.mongodb.scala._
 import org.mongodb.scala.model.Filters._
+import play.api.libs.json.{Format, OFormat}
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
@@ -64,18 +66,26 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
 
     )
   )
+
 ) with MetricsRepo {
 
   override def save(conversationMetrics: ConversationMetrics): Future[Boolean] = {
     logger.debug(s"saving conversationMetrics: $conversationMetrics")
     lazy val errorMsg = s"event data not inserted for $conversationMetrics"
 
-    collection.insertOne(conversationMetrics).toFuture().map(result => result.wasAcknowledged()).recover {
-
-      val errorMsg1 = s"$errorMsg"
-      logger.error(errorMsg1)
-      throw new IllegalStateException(errorMsg1)
-    }
+    collection.insertOne(conversationMetrics).toFuture().map(result => result.wasAcknowledged())
+      .recover {
+        case e: RuntimeException =>
+          //TODO Remove PrintLn
+          println(e.getMessage)
+          val errorMsg1 = s"$errorMsg"
+          logger.error(errorMsg1)
+          false
+        case _ =>
+          val errorMsg1 = s"$errorMsg"
+          logger.error(errorMsg1)
+        throw new IllegalStateException(errorMsg1)
+      }
   }
 
 

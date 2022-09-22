@@ -21,15 +21,15 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc._
+import play.api.test.Helpers
 import play.api.test.Helpers._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetrics
+import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsMongoRepo
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import util.TestData.{InvalidDateTimeStampRequest, ValidRequest}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class MetricsSpec extends AnyFeatureSpec
   with GivenWhenThen
@@ -39,19 +39,17 @@ class MetricsSpec extends AnyFeatureSpec
   with OptionValues
   with DefaultPlayMongoRepositorySupport[ConversationMetrics] {
 
-  override lazy val repository = new PlayMongoRepository[ConversationMetrics](mongoComponent,
-    collectionName = "metrics",
-    domainFormat = ConversationMetrics.conversationMetricsJF,
-    Seq.empty
-  )
-  val repo = repository
+  lazy val repository: MetricsMongoRepo = app.injector.instanceOf[MetricsMongoRepo]
+
+  implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
+
 
   override protected def beforeEach() {
-    await(repo.collection.drop.toFuture())
+    await(repository.collection.drop().toFuture())
   }
 
   override protected def afterEach() {
-    await(repo.collection.drop().toFuture())
+    await(repository.collection.drop().toFuture())
   }
 
   Feature("Record time stamps in metrics service") {

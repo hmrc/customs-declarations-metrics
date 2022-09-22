@@ -16,43 +16,37 @@
 
 package integration
 
-import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.mongodb.scala.model.Filters
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import play.api.libs.json.Json
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.Helpers
-import org.mongodb.scala.model.Filters._
-import org.mongodb.scala.model.Updates._
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetrics, MetricsConfig}
-import uk.gov.hmrc.customs.declarations.metrics.repo.{MetricsMongoRepo}
-import uk.gov.hmrc.mongo.{MongoComponent}
+
+import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsMongoRepo
+import uk.gov.hmrc.mongo.play.json.formats.MongoUuidFormats
 import util.TestData._
 import util.UnitSpec
+import scala.concurrent.ExecutionContext
 
 class MetricsMongoRepoSpec extends UnitSpec
   with BeforeAndAfterAll
   with BeforeAndAfterEach
+  with GuiceOneAppPerSuite
   with MockitoSugar
-  {
-  self =>
+  with MongoUuidFormats.Implicits {
+
+  implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
 
   private val mockLogger = mock[CdsLogger]
-//  private val mockErrorHandler = mock[MetricsRepoErrorHandler]
   private val mockMetricsConfig = mock[MetricsConfig]
-  private val mongoComponent = mock[MongoComponent]
-  private implicit val ec = Helpers.stubControllerComponents().executionContext
 
   val twoWeeksInSeconds = 1209600
+    lazy val repository: MetricsMongoRepo = app.injector.instanceOf[MetricsMongoRepo]
 
-  //  private val mongoDbProvider: MongoDbProvider = new MongoDbProvider {
-  //    override val mongo: () => DB = self.mongo
-  //  }
-
-  private val repository = new MetricsMongoRepo(mongoComponent, mockLogger, mockMetricsConfig)
 
   override def beforeEach() {
     await(repository.collection.drop.toFuture())
@@ -71,7 +65,6 @@ class MetricsMongoRepoSpec extends UnitSpec
   "repository" should {
 
     "successfully save a metric with a single declaration event" in {
-   //   when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       val saveResult = await(repository.save(ConversationMetricsWithDeclarationEventOnly))
       saveResult shouldBe true
       collectionSize shouldBe 1
@@ -84,7 +77,6 @@ class MetricsMongoRepoSpec extends UnitSpec
     }
 
     "successfully update existing metric with a notification event" in {
-  //    when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       val saveResult = await(repository.save(ConversationMetricsWithDeclarationEventOnly))
       saveResult shouldBe true
       collectionSize shouldBe 1
@@ -100,7 +92,6 @@ class MetricsMongoRepoSpec extends UnitSpec
     }
 
     "no update for notification when declaration not found" in {
-  //    when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       val caught = intercept[IllegalStateException](await(repository.updateWithFirstNotification(NotificationConversationMetric)))
 
       caught.getMessage shouldBe "event data not updated for ConversationMetric(dff783d7-44ee-4836-93d0-3242da7c225f,Event(EventType(NOTIFICATION),2014-10-23T00:36:14.123Z,2014-10-23T00:36:18.123Z))"
@@ -108,7 +99,6 @@ class MetricsMongoRepoSpec extends UnitSpec
     }
 
     "no update when notification metric already present" in {
-     // when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       await(repository.save(ConversationMetricsWithDeclarationEventOnly))
       await(repository.updateWithFirstNotification(NotificationConversationMetric))
 
@@ -117,7 +107,6 @@ class MetricsMongoRepoSpec extends UnitSpec
     }
 
     "no update when second notification stored" in {
-    //  when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       await(repository.save(ConversationMetricsWithDeclarationEventOnly))
       await(repository.updateWithFirstNotification(NotificationConversationMetric))
 
@@ -128,7 +117,6 @@ class MetricsMongoRepoSpec extends UnitSpec
     }
 
     "successfully delete all metrics" in {
-  //    when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       await(repository.save(ConversationMetricsWithDeclarationEventOnly))
       await(repository.updateWithFirstNotification(NotificationConversationMetric))
       await(repository.deleteAll())
@@ -137,6 +125,5 @@ class MetricsMongoRepoSpec extends UnitSpec
 
   }
 
-  private def fetchMetrics: ConversationMetrics = await(repository.collection.find(filter = and(Filters.equal("conversationId", DeclarationConversationId.id))).toFuture()).head
+  private def fetchMetrics: ConversationMetrics = await(repository.collection.find(filter = Filters.equal("conversationId", DeclarationConversationId.id)).toFuture()).head
 }
-  //private def fetchMetrics: ConversationMetrics = await(repository.find("conversationId" -> DeclarationConversationId.id)).head}
