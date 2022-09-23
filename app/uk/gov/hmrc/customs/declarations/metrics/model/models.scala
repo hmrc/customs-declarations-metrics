@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.model
 
-import java.time.{Instant, ZoneId, ZonedDateTime}
-import java.util.UUID
-
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+
+import java.time.ZonedDateTime
+import java.util.UUID
 
 object RequestReads {
   val dateTimeRequestReads: Reads[ZonedDateTime] = JsPath.read[String].map { zonedDateTime =>
@@ -37,22 +37,22 @@ object RequestReads {
     )(ConversationMetric.apply _)
 }
 
-object DateTimeFormats {
-  //"$date" in reads and writes used to preserve date type, part of MongoDB Extended JSON.
-  //Read more here - http://reactivemongo.org/releases/0.1x/documentation/json/overview.html#documents-and-values
-  val dateTimeReads: Reads[ZonedDateTime] =
-    (__ \ "$date").read[Long].map { zonedDateTime =>
-      val instant = Instant.ofEpochMilli(zonedDateTime)
-      ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"))
-    }
-
-  implicit val dateTimeWrite: Writes[ZonedDateTime] = new Writes[ZonedDateTime] {
-    def writes(zonedDateTime: ZonedDateTime): JsValue = Json.obj("$date" -> zonedDateTime.toInstant.toEpochMilli
-    )
-  }
-
-  implicit val dateTimeJF: Format[ZonedDateTime] = Format(dateTimeReads, dateTimeWrite)
-}
+//object DateTimeFormats {
+//  //"$date" in reads and writes used to preserve date type, part of MongoDB Extended JSON.
+//  //Read more here - http://reactivemongo.org/releases/0.1x/documentation/json/overview.html#documents-and-values
+//  val dateTimeReads: Reads[ZonedDateTime] =
+//    (__ \ "$date").read[Long].map { zonedDateTime =>
+//      val instant = Instant.ofEpochMilli(zonedDateTime)
+//      ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"))
+//    }
+//
+//  implicit val dateTimeWrite: Writes[ZonedDateTime] = new Writes[ZonedDateTime] {
+//    def writes(zonedDateTime: ZonedDateTime): JsValue = Json.obj("$date" -> zonedDateTime.toInstant.toEpochMilli
+//    )
+//  }
+//
+//  implicit val dateTimeJF: Format[ZonedDateTime] = Format(dateTimeReads, dateTimeWrite)
+//}
 
 case class EventType(eventTypeString: String) extends AnyVal
 object EventType {
@@ -80,40 +80,40 @@ object ConversationId {
 
 case class Event(eventType: EventType, eventStart: ZonedDateTime, eventEnd: ZonedDateTime)
 object Event {
-  implicit val dateTimeFormats: Format[ZonedDateTime] = DateTimeFormats.dateTimeJF
-  implicit val eventReads: Reads[Event] = (
-    (__ \ "eventType").read[EventType] and
-    (__ \ "eventStart").read[ZonedDateTime] and
-    (__ \ "eventEnd").read[ZonedDateTime]) (Event.apply _)
-  implicit val eventWrites: OWrites[Event] = (
-    (__ \ "eventType").write[EventType] and
-    (__ \ "eventStart").write[ZonedDateTime] and
-    (__ \ "eventEnd").write[ZonedDateTime]) (unlift(Event.unapply))
+  implicit val dateTimeFormats: Format[ZonedDateTime] = ModelsZonedDateTimeFormat.mongoZonedDateTimeFormat
+//  implicit val eventReads: Reads[Event] = (
+//    (__ \ "eventType").read[EventType] and
+//    (__ \ "eventStart").read[ZonedDateTime] and
+//    (__ \ "eventEnd").read[ZonedDateTime]) (Event.apply _)
+//  implicit val eventWrites: Writes[Event] = (
+//    (__ \ "eventType").write[EventType] and
+//    (__ \ "eventStart").write[ZonedDateTime] and
+//    (__ \ "eventEnd").write[ZonedDateTime]) (unlift(Event.unapply))
 
-  implicit val EventJF: Format[Event] = Format(eventReads, eventWrites)
+  implicit val EventJF: Format[Event] = Json.format[Event]
 }
 
 case class ConversationMetric(conversationId: ConversationId, event: Event)
 object ConversationMetric {
-  implicit val dateTimeFormats: Format[ZonedDateTime] = DateTimeFormats.dateTimeJF
-  implicit val conversationMetricReads: Reads[ConversationMetric] = (
-    (__ \ "conversationId").read[ConversationId] and
-    Event.eventReads
-  )(ConversationMetric.apply _)
+  implicit val dateTimeFormats: Format[ZonedDateTime] = ModelsZonedDateTimeFormat.mongoZonedDateTimeFormat
+//  implicit val conversationMetricReads: Reads[ConversationMetric] = (
+//    (__ \ "conversationId").read[ConversationId] and
+//    Event.eventReads
+//  )(ConversationMetric.apply _)
+//
+//  implicit val conversationMetricWrites: Writes[ConversationMetric] =(
+//    (__ \ "conversationId").write[ConversationId] and
+//      Event.eventWrites) (unlift(ConversationMetric.unapply))
 
-  implicit val conversationMetricWrites: OWrites[ConversationMetric] =(
-    (__ \ "conversationId").write[ConversationId] and
-      Event.eventWrites) (unlift(ConversationMetric.unapply))
-
-  implicit val conversationMetricJF: Format[ConversationMetric] = Format(conversationMetricReads, conversationMetricWrites)
+  implicit val conversationMetricJF: Format[ConversationMetric] = Json.format[ConversationMetric]
 }
 
 case class ConversationMetrics(conversationId: ConversationId, events: Seq[Event], createdDate: ZonedDateTime)
 object ConversationMetrics {
 
-  implicit val dateTimeFormats: Format[ZonedDateTime] = DateTimeFormats.dateTimeJF
-  implicit val eventsReads: Reads[Seq[Event]] = Reads.seq(Event.eventReads)
-  implicit val eventsWrites: Writes[Seq[Event]] = Writes.seq(Event.eventWrites)
+  implicit val dateTimeFormats: Format[ZonedDateTime] = ModelsZonedDateTimeFormat.mongoZonedDateTimeFormat
+  implicit val eventsReads: Reads[Seq[Event]] = Reads.seq[Event]
+  implicit val eventsWrites: Writes[Seq[Event]] = Writes.seq[Event]
 
   implicit val conversationMetricsJF: OFormat[ConversationMetrics] = Json.format[ConversationMetrics]
 }

@@ -95,7 +95,7 @@ class MetricsMongoRepoSpec extends UnitSpec
       val caught = intercept[IllegalStateException](await(repository.updateWithFirstNotification(NotificationConversationMetric)))
 
       caught.getMessage shouldBe "event data not updated for ConversationMetric(dff783d7-44ee-4836-93d0-3242da7c225f,Event(EventType(NOTIFICATION),2014-10-23T00:36:14.123Z,2014-10-23T00:36:18.123Z))"
-      collectionSize shouldBe 0
+      collectionSize shouldBe 1
     }
 
     "no update when notification metric already present" in {
@@ -125,5 +125,5 @@ class MetricsMongoRepoSpec extends UnitSpec
 
   }
 
-  private def fetchMetrics: ConversationMetrics = await(repository.collection.find(filter = Filters.equal("conversationId", DeclarationConversationId.id)).toFuture()).head
+  private def fetchMetrics: ConversationMetrics = await(repository.collection.find(filter = Filters.equal("conversationId", DeclarationConversationId.id.toString)).toFuture()).head
 }

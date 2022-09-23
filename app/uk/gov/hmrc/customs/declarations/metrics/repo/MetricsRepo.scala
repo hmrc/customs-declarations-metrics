@@ -17,20 +17,18 @@
 package uk.gov.hmrc.customs.declarations.metrics.repo
 
 import com.google.inject.ImplementedBy
-import org.mongodb.scala.Document
-import org.mongodb.scala.model.Updates.push
-import org.mongodb.scala.model.{FindOneAndUpdateOptions, IndexModel, IndexOptions, Indexes, ReturnDocument}
-
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, Event, MetricsConfig}
-import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import org.mongodb.scala._
 import org.mongodb.scala.model.Filters._
-import play.api.libs.json.{Format, OFormat}
+import org.mongodb.scala.model.Updates.push
+import org.mongodb.scala.model._
+import uk.gov.hmrc.customs.api.common.logging.CdsLogger
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics}
+import uk.gov.hmrc.customs.declarations.metrics.model.MetricsConfig
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
 import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[MetricsMongoRepo])
@@ -81,8 +79,7 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
           val errorMsg1 = s"$errorMsg"
           logger.error(errorMsg1)
           false
-        case _ =>
-          val errorMsg1 = s"$errorMsg"
+        case e => val errorMsg1 = s"$errorMsg"
           logger.error(errorMsg1)
         throw new IllegalStateException(errorMsg1)
       }
@@ -93,13 +90,23 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
     logger.debug(s"updating with first notification: $conversationMetric")
     lazy val errorMsg = s"event data not updated for $conversationMetric"
 
-    val selector = and(equal("conversationId",conversationMetric.conversationId.id),exists("events.1",exists = false))
+    val selector = and(equal(
+      "conversationId",conversationMetric.conversationId.id.toString),
+      exists("events.1",exists = false))
 
-    val update =  push("events", conversationMetric.event)
+    val update =  push("events", Codecs.toBson(conversationMetric.event))
 
     val result= collection.findOneAndUpdate(filter = selector, update = update,
-      options = FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER)).toFuture()
-   result.recover {
+      options = FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER)).toFutureOption()
+
+    result.map{
+      case Some(record) => record
+      case None => logger.error(s"mongo error: findOneAndUpdate failed")
+        logger.debug(errorMsg)
+        throw new IllegalStateException(errorMsg)
+    }
+   result.map(_.get).recover {
+     case _ =>
      logger.error(s"mongo error: findOneAndUpdate failed")
      logger.debug(errorMsg)
      throw new IllegalStateException(errorMsg)

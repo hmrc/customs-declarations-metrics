@@ -18,13 +18,13 @@ package util
 
 import java.time._
 import java.util.UUID
-
 import play.api.http.MimeTypes
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, AnyContentAsText, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ACCEPT, CONTENT_TYPE}
 import uk.gov.hmrc.customs.declarations.metrics.model._
+
 import scala.util.Try
 
 object TestData {
