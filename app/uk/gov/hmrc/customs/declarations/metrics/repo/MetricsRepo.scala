@@ -74,8 +74,6 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
     collection.insertOne(conversationMetrics).toFuture().map(result => result.wasAcknowledged())
       .recover {
         case e: RuntimeException =>
-          //TODO Remove PrintLn
-          println(e.getMessage)
           val errorMsg1 = s"$errorMsg"
           logger.error(errorMsg1)
           false
@@ -101,16 +99,10 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
 
     result.map{
       case Some(record) => record
-      case None => logger.error(s"mongo error: findOneAndUpdate failed")
+      case _ => logger.error(s"mongo error: findOneAndUpdate failed for: ${conversationMetric.conversationId}")
         logger.debug(errorMsg)
         throw new IllegalStateException(errorMsg)
     }
-   result.map(_.get).recover {
-     case _ =>
-     logger.error(s"mongo error: findOneAndUpdate failed")
-     logger.debug(errorMsg)
-     throw new IllegalStateException(errorMsg)
-   }
 
   }
 
