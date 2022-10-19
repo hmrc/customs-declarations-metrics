@@ -18,6 +18,7 @@ package integration
 
 import org.mockito.Mockito
 import org.mockito.Mockito._
+import org.mongodb.scala.bson.Document
 import org.mongodb.scala.model.Filters
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
@@ -25,7 +26,6 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.Helpers
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetrics, MetricsConfig}
-
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsMongoRepo
 import uk.gov.hmrc.mongo.play.json.formats.MongoUuidFormats
 import util.TestData._
@@ -49,13 +49,13 @@ class MetricsMongoRepoSpec extends UnitSpec
 
 
   override def beforeEach() {
-    await(repository.collection.drop.toFuture())
+    await(repository.collection.deleteMany(Document.empty).toFuture())
     Mockito.reset(mockLogger)
     when(mockMetricsConfig.ttlInSeconds).thenReturn(twoWeeksInSeconds)
   }
 
   override def afterAll() {
-    await(repository.collection.drop.toFuture())
+    await(repository.collection.deleteMany(Document.empty).toFuture())
   }
 
   private def collectionSize: Int = {
@@ -74,6 +74,15 @@ class MetricsMongoRepoSpec extends UnitSpec
       findResult.events.head.eventType.eventTypeString shouldBe "DECLARATION"
       findResult.events.head.eventStart should not be None
       findResult.events.head.eventEnd should not be None
+    }
+
+    "fail to save duplicate metric with a matching id" in {
+      val saveResult = await(repository.save(ConversationMetricsWithDeclarationEventOnly))
+      saveResult shouldBe true
+      val saveToFail = intercept[IllegalStateException](await(repository.save(ConversationMetricsWithDeclarationEventOnly)))
+      saveToFail.getMessage should include  ("event data not inserted for ConversationMetrics(dff783d7-44ee-4836-93d0-3242da7c225f")
+      collectionSize shouldBe 1
+
     }
 
     "successfully update existing metric with a notification event" in {

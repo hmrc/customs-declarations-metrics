@@ -16,6 +16,7 @@
 
 package component
 
+import org.mongodb.scala.bson.Document
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest._
@@ -25,7 +26,6 @@ import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetrics
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsMongoRepo
-import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import util.TestData.{InvalidDateTimeStampRequest, ValidRequest}
 
@@ -45,11 +45,11 @@ class MetricsSpec extends AnyFeatureSpec
 
 
   override protected def beforeEach() {
-    await(repository.collection.drop().toFuture())
+    await(repository.collection.deleteMany(Document.empty).toFuture())
   }
 
   override protected def afterEach() {
-    await(repository.collection.drop().toFuture())
+    await(repository.collection.deleteMany(Document.empty).toFuture())
   }
 
   Feature("Record time stamps in metrics service") {
