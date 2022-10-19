@@ -73,11 +73,11 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
 
     collection.insertOne(conversationMetrics).toFuture().map(result => result.wasAcknowledged())
       .recover {
-        case e: RuntimeException =>
+        case _: RuntimeException =>
           val errorMsg1 = s"$errorMsg"
           logger.error(errorMsg1)
           false
-        case e => val errorMsg1 = s"$errorMsg"
+        case e => val errorMsg1 = s"$errorMsg: ${e.getMessage}"
           logger.error(errorMsg1)
         throw new IllegalStateException(errorMsg1)
       }
