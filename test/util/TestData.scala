@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package util
 
 import java.time._
 import java.util.UUID
-
 import play.api.http.MimeTypes
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, AnyContentAsText, Request}
@@ -37,16 +36,16 @@ object TestData {
   val DeclarationEvent: Event = Event(DeclarationEventType, DeclarationTimeStampEntry, DeclarationTimeStampExit)
   val DeclarationConversationMetric: ConversationMetric = ConversationMetric(DeclarationConversationId, DeclarationEvent)
 
-  val NotificationEventType = EventType("NOTIFICATION")
-  val NotificationConversationId = ConversationId(UUID.fromString("153d8350-10df-4bd7-b6ad-636450e7fda1"))
+  val NotificationEventType: EventType = EventType("NOTIFICATION")
+  val NotificationConversationId: ConversationId = ConversationId(UUID.fromString("153d8350-10df-4bd7-b6ad-636450e7fda1"))
   val NotificationTimeStampEntry: ZonedDateTime = ZonedDateTime.parse("2014-10-23T00:36:14.123Z")
   val NotificationTimeStampExit: ZonedDateTime = NotificationTimeStampEntry.plusSeconds(4)
-  val NotificationEvent = Event(NotificationEventType, NotificationTimeStampEntry, NotificationTimeStampExit)
-  val NotificationConversationMetric = ConversationMetric(DeclarationConversationId, NotificationEvent)
+  val NotificationEvent: Event = Event(NotificationEventType, NotificationTimeStampEntry, NotificationTimeStampExit)
+  val NotificationConversationMetric: ConversationMetric = ConversationMetric(DeclarationConversationId, NotificationEvent)
 
-  val ConversationMetricsWithDeclarationEventOnly = ConversationMetrics(DeclarationConversationId, Seq(DeclarationEvent), ZonedDateTime.now(ZoneId.of("UTC")))
-  val ConversationMetricsWithNotificationEventOnly = ConversationMetrics(DeclarationConversationId, Seq(NotificationEvent), ZonedDateTime.now(ZoneId.of("UTC")))
-  val ConversationMetrics1 = ConversationMetrics(DeclarationConversationId, Seq(DeclarationEvent, NotificationEvent), ZonedDateTime.now(ZoneId.of("UTC")))
+  val ConversationMetricsWithDeclarationEventOnly: ConversationMetrics = ConversationMetrics(DeclarationConversationId, Seq(DeclarationEvent), ZonedDateTime.now(ZoneId.of("UTC")))
+  val ConversationMetricsWithNotificationEventOnly: ConversationMetrics = ConversationMetrics(DeclarationConversationId, Seq(NotificationEvent), ZonedDateTime.now(ZoneId.of("UTC")))
+  val ConversationMetrics1: ConversationMetrics = ConversationMetrics(DeclarationConversationId, Seq(DeclarationEvent, NotificationEvent), ZonedDateTime.now(ZoneId.of("UTC")))
 
   val ValidJson: JsValue = Json.parse("""
        |{

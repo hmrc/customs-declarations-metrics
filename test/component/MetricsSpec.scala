@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,20 @@
 
 package component
 
+import org.mongodb.scala.bson.Document
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc._
+import play.api.test.Helpers
 import play.api.test.Helpers._
-import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetrics
-import uk.gov.hmrc.customs.declarations.metrics.repo.MongoDbProvider
-import uk.gov.hmrc.mongo.{Awaiting, MongoSpecSupport, ReactiveRepository}
+import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsMongoRepo
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import util.TestData.{InvalidDateTimeStampRequest, ValidRequest}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class MetricsSpec extends AnyFeatureSpec
   with GivenWhenThen
@@ -36,20 +37,19 @@ class MetricsSpec extends AnyFeatureSpec
   with BeforeAndAfterEach
   with Matchers
   with OptionValues
-  with MongoSpecSupport
-  with Awaiting {
+  with DefaultPlayMongoRepositorySupport[ConversationMetrics] {
 
-  val repo = new ReactiveRepository[ConversationMetrics, BSONObjectID](
-    collectionName = "metrics",
-    mongo = app.injector.instanceOf[MongoDbProvider].mongo,
-    domainFormat = ConversationMetrics.conversationMetricsJF) {  }
+  lazy val repository: MetricsMongoRepo = app.injector.instanceOf[MetricsMongoRepo]
+
+  implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
+
 
   override protected def beforeEach() {
-    await(repo.drop)
+    await(repository.collection.deleteMany(Document.empty).toFuture())
   }
 
   override protected def afterEach() {
-    await(repo.drop)
+    await(repository.collection.deleteMany(Document.empty).toFuture())
   }
 
   Feature("Record time stamps in metrics service") {

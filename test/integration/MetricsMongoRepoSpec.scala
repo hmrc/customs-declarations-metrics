@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,59 +16,55 @@
 
 package integration
 
-import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
+import org.mongodb.scala.bson.Document
+import org.mongodb.scala.model.Filters
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import play.api.libs.json.Json
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.Helpers
-import reactivemongo.api.DB
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetrics, MetricsConfig}
-import uk.gov.hmrc.customs.declarations.metrics.repo.{MetricsMongoRepo, MetricsRepoErrorHandler, MongoDbProvider}
-import uk.gov.hmrc.mongo.MongoSpecSupport
+import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsMongoRepo
+import uk.gov.hmrc.mongo.play.json.formats.MongoUuidFormats
 import util.TestData._
 import util.UnitSpec
+import scala.concurrent.ExecutionContext
 
 class MetricsMongoRepoSpec extends UnitSpec
   with BeforeAndAfterAll
   with BeforeAndAfterEach
+  with GuiceOneAppPerSuite
   with MockitoSugar
-  with MongoSpecSupport {
-  self =>
+  with MongoUuidFormats.Implicits {
+
+  implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
 
   private val mockLogger = mock[CdsLogger]
-  private val mockErrorHandler = mock[MetricsRepoErrorHandler]
   private val mockMetricsConfig = mock[MetricsConfig]
-  private implicit val ec = Helpers.stubControllerComponents().executionContext
 
   val twoWeeksInSeconds = 1209600
+    lazy val repository: MetricsMongoRepo = app.injector.instanceOf[MetricsMongoRepo]
 
-  private val mongoDbProvider: MongoDbProvider = new MongoDbProvider {
-    override val mongo: () => DB = self.mongo
-  }
-
-  private val repository = new MetricsMongoRepo(mongoDbProvider, mockErrorHandler, mockLogger, mockMetricsConfig)
 
   override def beforeEach() {
-    await(repository.drop)
-    Mockito.reset(mockErrorHandler, mockLogger)
+    await(repository.collection.deleteMany(Document.empty).toFuture())
+    Mockito.reset(mockLogger)
     when(mockMetricsConfig.ttlInSeconds).thenReturn(twoWeeksInSeconds)
   }
 
   override def afterAll() {
-    await(repository.drop)
+    await(repository.collection.deleteMany(Document.empty).toFuture())
   }
 
   private def collectionSize: Int = {
-    await(repository.count(Json.obj()))
+    await(repository.collection.countDocuments().toFuture()).toInt
   }
 
   "repository" should {
 
     "successfully save a metric with a single declaration event" in {
-      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       val saveResult = await(repository.save(ConversationMetricsWithDeclarationEventOnly))
       saveResult shouldBe true
       collectionSize shouldBe 1
@@ -80,8 +76,16 @@ class MetricsMongoRepoSpec extends UnitSpec
       findResult.events.head.eventEnd should not be None
     }
 
+    "fail to save duplicate metric with a matching id" in {
+      val saveResult = await(repository.save(ConversationMetricsWithDeclarationEventOnly))
+      saveResult shouldBe true
+      val saveToFail = intercept[IllegalStateException](await(repository.save(ConversationMetricsWithDeclarationEventOnly)))
+      saveToFail.getMessage should include  ("event data not inserted for ConversationMetrics(dff783d7-44ee-4836-93d0-3242da7c225f")
+      collectionSize shouldBe 1
+
+    }
+
     "successfully update existing metric with a notification event" in {
-      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       val saveResult = await(repository.save(ConversationMetricsWithDeclarationEventOnly))
       saveResult shouldBe true
       collectionSize shouldBe 1
@@ -97,7 +101,6 @@ class MetricsMongoRepoSpec extends UnitSpec
     }
 
     "no update for notification when declaration not found" in {
-      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       val caught = intercept[IllegalStateException](await(repository.updateWithFirstNotification(NotificationConversationMetric)))
 
       caught.getMessage shouldBe "event data not updated for ConversationMetric(dff783d7-44ee-4836-93d0-3242da7c225f,Event(EventType(NOTIFICATION),2014-10-23T00:36:14.123Z,2014-10-23T00:36:18.123Z))"
@@ -105,7 +108,6 @@ class MetricsMongoRepoSpec extends UnitSpec
     }
 
     "no update when notification metric already present" in {
-      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       await(repository.save(ConversationMetricsWithDeclarationEventOnly))
       await(repository.updateWithFirstNotification(NotificationConversationMetric))
 
@@ -114,7 +116,6 @@ class MetricsMongoRepoSpec extends UnitSpec
     }
 
     "no update when second notification stored" in {
-      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
       await(repository.save(ConversationMetricsWithDeclarationEventOnly))
       await(repository.updateWithFirstNotification(NotificationConversationMetric))
 
@@ -124,8 +125,7 @@ class MetricsMongoRepoSpec extends UnitSpec
       fetchMetrics.events.size shouldBe 2
     }
 
-    "successfully delete all metrics" in  {
-      when(mockErrorHandler.handleSaveError(any(), any())).thenReturn(true)
+    "successfully delete all metrics" in {
       await(repository.save(ConversationMetricsWithDeclarationEventOnly))
       await(repository.updateWithFirstNotification(NotificationConversationMetric))
       await(repository.deleteAll())
@@ -134,5 +134,5 @@ class MetricsMongoRepoSpec extends UnitSpec
 
   }
 
-  private def fetchMetrics: ConversationMetrics = await(repository.find("conversationId" -> DeclarationConversationId.id)).head
+  private def fetchMetrics: ConversationMetrics = await(repository.collection.find(filter = Filters.equal("conversationId", DeclarationConversationId.id.toString)).toFuture()).head
 }
