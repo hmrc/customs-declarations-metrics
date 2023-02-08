@@ -32,7 +32,6 @@ lazy val microservice = (project in file("."))
     commonSettings,
     unitTestSettings,
     integrationComponentTestSettings,
-    playPublishingSettings,
     allTest,
     scoverageSettings
   )
