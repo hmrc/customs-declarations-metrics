@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package unit.services
 
 
-import java.time.Duration
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
 import org.mockito.ArgumentMatchers.any
@@ -29,9 +28,10 @@ import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 import uk.gov.hmrc.customs.declarations.metrics.services.{HasMetrics, MetricsService}
-import util.UnitSpec
 import util.TestData.{ConversationMetrics1, DeclarationConversationMetric, NotificationConversationMetric}
+import util.UnitSpec
 
+import java.time.Duration
 import scala.concurrent.Future
 
 class MetricsServiceSpec extends UnitSpec {
