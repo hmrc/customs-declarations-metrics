@@ -81,8 +81,7 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
 
 
   override def updateWithFirstNotification(conversationMetric: ConversationMetric): Future[ConversationMetrics] = {
-    logger.debug(s"updating with first notification: $conversationMetric")
-    lazy val errorMsg = s"event data not updated for $conversationMetric"
+    logger.debug(s"updating with first notification: [$conversationMetric]")
 
     val selector = and(equal(
       "conversationId",conversationMetric.conversationId.id.toString),
@@ -90,14 +89,19 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
 
     val update =  push("events", Codecs.toBson(conversationMetric.event))
 
-    val result= collection.findOneAndUpdate(filter = selector, update = update,
-      options = FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER)).toFutureOption()
-
+    val result = collection.findOneAndUpdate(filter = selector, update = update,
+      options = FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER)).toFutureOption().recover {
+      case t: Throwable => {
+        logger.error(s"mongo error: findOneAndUpdate failed for: [${conversationMetric.conversationId}] Error: [${t.getMessage}]", t)
+        throw t
+      }
+    }
     result.map{
       case Some(record) => record
-      case _ => logger.error(s"mongo error: findOneAndUpdate failed for: ${conversationMetric.conversationId}")
-        logger.debug(errorMsg)
-        throw new IllegalStateException(errorMsg)
+      case _ =>
+        val noUpdatedMsg = s"event data not updated for: [$conversationMetric]"
+        logger.debug(noUpdatedMsg)
+        throw new IllegalStateException(noUpdatedMsg)
     }
 
   }
