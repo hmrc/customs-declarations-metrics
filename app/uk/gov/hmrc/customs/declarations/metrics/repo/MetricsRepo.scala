@@ -56,7 +56,7 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
         .unique(true)
     ),
     IndexModel(
-      Indexes.descending("createdAt"),
+      Indexes.descending("createdDate"),
       IndexOptions()
         .name("createdDate-Index")
         .unique(false)
