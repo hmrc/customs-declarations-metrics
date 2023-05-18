@@ -3,7 +3,7 @@ import sbt._
 object AppDependencies {
 
   private val testScope = "test,it"
-  private val hmrcMongoVersion = "0.74.0"
+  private val hmrcMongoVersion = "1.2.0"
 
   val compile = Seq(
     "uk.gov.hmrc"                                %% "customs-api-common" % "1.59.0",
