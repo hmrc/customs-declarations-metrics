@@ -18,7 +18,6 @@ package unit.controllers
 
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{RETURNS_DEEP_STUBS, when}
-import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.i18n.MessagesApi
 import play.api.libs.json.JsValue
 import play.api.mvc.{ControllerComponents, Request, Result}
@@ -46,7 +45,7 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec {
     val mockMessagesApi: MessagesApi = mock[MessagesApi](RETURNS_DEEP_STUBS)
     val controller: CustomsDeclarationsMetricsController = new CustomsDeclarationsMetricsController(mockLogger, mockService, cc, mockMessagesApi) {}
 
-    def testSubmitResult(request: Request[Try[JsValue]])(test: Future[Result] => Unit) {
+    def testSubmitResult(request: Request[Try[JsValue]])(test: Future[Result] => Unit): Unit = {
       test(controller.post().apply(request))
     }
   }
