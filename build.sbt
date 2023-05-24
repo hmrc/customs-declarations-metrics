@@ -36,6 +36,9 @@ lazy val microservice = (project in file("."))
     scoverageSettings
   )
   .settings(majorVersion := 0)
+  .settings(scalacOptions ++= List(
+    "-Wconf:cat=unused-imports&src=target/scala-2\\.13/routes/.*:s"
+  ))
 
 lazy val unitTestSettings =
   inConfig(Test)(Defaults.testTasks) ++
