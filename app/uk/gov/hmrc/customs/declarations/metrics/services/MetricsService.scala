@@ -24,11 +24,9 @@ import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorInternalServerError
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, Event, EventType}
-import uk.gov.hmrc.customs.declarations.metrics.model._
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Left
 
 @Singleton
 class MetricsService @Inject()(val logger: CdsLogger, metricsRepo: MetricsRepo, val metrics: Metrics)(implicit ec: ExecutionContext) extends HasMetrics {

@@ -22,7 +22,7 @@ import org.scalatestplus.mockito.MockitoSugar
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.language.implicitConversions
+import scala.language.{implicitConversions, postfixOps}
 
 trait UnitSpec extends AnyWordSpec with Matchers with MockitoSugar {
 

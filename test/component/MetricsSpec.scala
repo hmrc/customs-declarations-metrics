@@ -44,11 +44,11 @@ class MetricsSpec extends AnyFeatureSpec
   implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
 
 
-  override protected def beforeEach() {
+  override protected def beforeEach(): Unit = {
     await(repository.collection.deleteMany(Document.empty).toFuture())
   }
 
-  override protected def afterEach() {
+  override protected def afterEach(): Unit = {
     await(repository.collection.deleteMany(Document.empty).toFuture())
   }
 
@@ -62,13 +62,13 @@ class MetricsSpec extends AnyFeatureSpec
       val result = route(app, ValidRequest)
 
       Then("a response with a 202 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture: Future[Result] = result.value
 
       status(resultFuture) shouldBe ACCEPTED
 
       And("the response body is empty")
-      contentAsString(resultFuture) shouldBe 'empty
+      contentAsString(resultFuture) shouldBe empty
     }
 
 
@@ -80,7 +80,7 @@ class MetricsSpec extends AnyFeatureSpec
       val result = route(app, InvalidDateTimeStampRequest)
 
       Then("a response with a 400 status is received")
-      result shouldBe 'defined
+      result shouldBe defined
       val resultFuture: Future[Result] = result.value
 
       status(resultFuture) shouldBe BAD_REQUEST

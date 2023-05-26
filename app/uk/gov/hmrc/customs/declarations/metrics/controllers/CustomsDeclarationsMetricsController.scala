@@ -63,11 +63,12 @@ class CustomsDeclarationsMetricsController @Inject() (val logger: CdsLogger,
   }
 
   private def invalidJsonErrorResponse(jsError: JsError)(implicit messages: Messages): ErrorResponse = {
-    val contents = for {
-      (jsPath, validationErrors) <- jsError.errors
+    val contents: Seq[ResponseContents] = for {
+      (jsPath, validationErrors) <- jsError.errors.toSeq
       validationError <- validationErrors
       errorMessage = s"$jsPath: ${messages(validationError.message, validationError.args: _*)}"
     } yield ResponseContents("INVALID_JSON", errorMessage)
+
     logger.error("failed JSON schema validation")
 
     errorBadRequest("Request failed schema validation").withErrors(contents: _*)

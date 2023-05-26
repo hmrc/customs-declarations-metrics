@@ -48,13 +48,13 @@ class MetricsMongoRepoSpec extends UnitSpec
     lazy val repository: MetricsMongoRepo = app.injector.instanceOf[MetricsMongoRepo]
 
 
-  override def beforeEach() {
+  override def beforeEach(): Unit = {
     await(repository.collection.deleteMany(Document.empty).toFuture())
     Mockito.reset(mockLogger)
     when(mockMetricsConfig.ttlInSeconds).thenReturn(twoWeeksInSeconds)
   }
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     await(repository.collection.deleteMany(Document.empty).toFuture())
   }
 
