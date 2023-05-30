@@ -20,23 +20,25 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.customs.api.common.config.ConfigValidatedNelAdaptor
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.MetricsConfig
+import cats.implicits._
 
 @Singleton
 class ConfigService @Inject() (configValidatedNel: ConfigValidatedNelAdaptor, logger: CdsLogger) extends MetricsConfig {
 
-  private case class MetricsConfigImpl(ttlInSeconds: Int) extends MetricsConfig
+  private case class MetricsConfigImpl(ttlInSeconds: Int, replaceIndexes: Boolean) extends MetricsConfig
 
-  private val config = {
-    val validatedConfig = configValidatedNel.root.int("ttlInSeconds") map MetricsConfigImpl
-    validatedConfig.fold({
-      nel => // error case exposes nel (a NotEmptyList)
-        val errorMsg = "\n" + nel.toList.mkString("\n")
-        logger.error(errorMsg)
-        throw new IllegalStateException(errorMsg)
-    },
-      config => config // success case exposes the value class
-    )
-  }
+  private val config: MetricsConfigImpl = (
+    configValidatedNel.root.int("ttlInSeconds"),
+    configValidatedNel.root.boolean("replaceIndexes")
+  ) mapN MetricsConfigImpl fold({
+    nel => // error case exposes nel (a NotEmptyList)
+      val errorMsg = "\n" + nel.toList.mkString("\n")
+      logger.error(errorMsg)
+      throw new IllegalStateException(errorMsg)
+  },
+    config => config // success case exposes the value class
+  )
 
   override def ttlInSeconds: Int = config.ttlInSeconds
+  override def replaceIndexes: Boolean = config.replaceIndexes
 }
