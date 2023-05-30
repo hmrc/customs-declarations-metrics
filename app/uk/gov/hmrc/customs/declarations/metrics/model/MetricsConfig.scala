@@ -21,4 +21,6 @@ trait MetricsConfig {
 
   def replaceIndexes: Boolean
 
+  def createdDateIndex: String
+
 }
