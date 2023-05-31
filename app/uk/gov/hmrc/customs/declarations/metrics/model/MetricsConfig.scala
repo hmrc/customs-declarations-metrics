@@ -18,4 +18,9 @@ package uk.gov.hmrc.customs.declarations.metrics.model
 
 trait MetricsConfig {
   def ttlInSeconds: Int
+
+  def replaceIndexes: Boolean
+
+  def createdDateIndex: String
+
 }

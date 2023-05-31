@@ -48,6 +48,7 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
   collectionName = "metrics",
   mongoComponent = mongo,
   domainFormat = ConversationMetrics.conversationMetricsJF,
+  replaceIndexes = metricsConfig.replaceIndexes,
   indexes = Seq(
     IndexModel(
       Indexes.ascending("conversationId"),
@@ -56,7 +57,7 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
         .unique(true)
     ),
     IndexModel(
-      Indexes.descending("createdAt"),
+      Indexes.descending(metricsConfig.createdDateIndex),
       IndexOptions()
         .name("createdDate-Index")
         .unique(false)
@@ -75,38 +76,36 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
       .recover {
         case e => val errorMsg1 = s"$errorMsg: ${e.getMessage}"
           logger.error(errorMsg1)
-        throw new IllegalStateException(errorMsg1)
+          throw new IllegalStateException(errorMsg1)
       }
   }
-
 
   override def updateWithFirstNotification(conversationMetric: ConversationMetric): Future[ConversationMetrics] = {
     logger.debug(s"updating with first notification: $conversationMetric")
     lazy val errorMsg = s"event data not updated for $conversationMetric"
 
     val selector = and(equal(
-      "conversationId",conversationMetric.conversationId.id.toString),
-      exists("events.1",exists = false))
+      "conversationId", conversationMetric.conversationId.id.toString),
+      exists("events.1", exists = false))
 
-    val update =  push("events", Codecs.toBson(conversationMetric.event))
+    val update = push("events", Codecs.toBson(conversationMetric.event))
 
-    val result= collection.findOneAndUpdate(filter = selector, update = update,
+    val result = collection.findOneAndUpdate(filter = selector, update = update,
       options = FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER)).toFutureOption()
 
-    result.map{
+    result.map {
       case Some(record) => record
-      case _ => logger.error(s"mongo error: findOneAndUpdate failed for: ${conversationMetric.conversationId}")
+      case None         => logger.error(s"mongo error: findOneAndUpdate failed for: [${conversationMetric.conversationId}]")
         logger.debug(errorMsg)
         throw new IllegalStateException(errorMsg)
     }
-
   }
 
   override def deleteAll(): Future[Unit] = {
     logger.debug(s"deleting all metrics")
 
     collection.deleteMany(filter = Document()).toFuture().map { result =>
-      logger.debug(s"deleted ${result.getDeletedCount} metrics")
+      logger.debug(s"deleted [${result.getDeletedCount}] metrics")
     }
   }
 
