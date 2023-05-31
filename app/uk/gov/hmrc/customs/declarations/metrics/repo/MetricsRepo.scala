@@ -95,7 +95,7 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
 
     result.map {
       case Some(record) => record
-      case None         => logger.error(s"mongo error: findOneAndUpdate failed for: ${conversationMetric.conversationId}")
+      case None         => logger.error(s"mongo error: findOneAndUpdate failed for: [${conversationMetric.conversationId}]")
         logger.debug(errorMsg)
         throw new IllegalStateException(errorMsg)
     }
@@ -105,7 +105,7 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
     logger.debug(s"deleting all metrics")
 
     collection.deleteMany(filter = Document()).toFuture().map { result =>
-      logger.debug(s"deleted ${result.getDeletedCount} metrics")
+      logger.debug(s"deleted [${result.getDeletedCount}] metrics")
     }
   }
 
