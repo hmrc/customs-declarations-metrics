@@ -62,7 +62,6 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
         .name("createdDate-Index")
         .unique(false)
         .expireAfter(metricsConfig.ttlInSeconds, TimeUnit.SECONDS)
-
     )
   )
 
