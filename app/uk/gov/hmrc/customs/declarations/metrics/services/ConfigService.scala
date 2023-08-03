@@ -20,20 +20,14 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.customs.api.common.config.ConfigValidatedNelAdaptor
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.MetricsConfig
-import cats.implicits._
 
 @Singleton
 class ConfigService @Inject() (configValidatedNel: ConfigValidatedNelAdaptor, logger: CdsLogger) extends MetricsConfig {
 
-  private case class MetricsConfigImpl(ttlInSeconds: Int, replaceIndexes: Boolean, createdDateIndex: String) extends MetricsConfig
+  private case class MetricsConfigImpl(ttlInSeconds: Int) extends MetricsConfig
 
   private val config = {
-    val validatedConfig = (
-      configValidatedNel.root.int("ttlInSeconds"),
-      configValidatedNel.root.boolean("replaceIndexes"),
-      configValidatedNel.root.string("createdDateIndex")
-    ) mapN MetricsConfigImpl
-
+    val validatedConfig = configValidatedNel.root.int("ttlInSeconds") map MetricsConfigImpl
     validatedConfig.fold({
       nel => // error case exposes nel (a NotEmptyList)
         val errorMsg = "\n" + nel.toList.mkString("\n")
@@ -43,7 +37,6 @@ class ConfigService @Inject() (configValidatedNel: ConfigValidatedNelAdaptor, lo
       config => config // success case exposes the value class
     )
   }
+
   override def ttlInSeconds: Int = config.ttlInSeconds
-  override def replaceIndexes: Boolean = config.replaceIndexes
-  override def createdDateIndex: String = config.createdDateIndex
 }

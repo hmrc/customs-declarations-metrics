@@ -31,8 +31,6 @@ class ConfigServiceSpec extends UnitSpec {
     s"""
       |{
       |ttlInSeconds = 101
-      |replaceIndexes = true
-      |createdDateIndex = "createdToday"
       |}
     """.stripMargin)
 
@@ -50,16 +48,12 @@ class ConfigServiceSpec extends UnitSpec {
       val actual: MetricsConfig = configService(validServicesConfig)
 
       actual.ttlInSeconds shouldBe 101
-      actual.replaceIndexes shouldBe true
-      actual.createdDateIndex shouldBe "createdToday"
     }
 
     "throw an exception when configuration is invalid, that contains AGGREGATED error messages" in {
       val expected =
         """
-          |Could not find config key 'ttlInSeconds'
-          |Could not find config key 'replaceIndexes'
-          |Could not find config key 'createdDateIndex'""".stripMargin
+          |Could not find config key 'ttlInSeconds'""".stripMargin
 
       val caught = intercept[IllegalStateException]{ configService(emptyServicesConfig) }
 

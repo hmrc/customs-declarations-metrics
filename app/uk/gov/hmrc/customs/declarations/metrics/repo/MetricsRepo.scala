@@ -48,7 +48,7 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
   collectionName = "metrics",
   mongoComponent = mongo,
   domainFormat = ConversationMetrics.conversationMetricsJF,
-  replaceIndexes = metricsConfig.replaceIndexes,
+  replaceIndexes = true,
   indexes = Seq(
     IndexModel(
       Indexes.ascending("conversationId"),
@@ -57,7 +57,7 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
         .unique(true)
     ),
     IndexModel(
-      Indexes.descending(metricsConfig.createdDateIndex),
+      Indexes.descending("createdDate"),
       IndexOptions()
         .name("createdDate-Index")
         .unique(false)
