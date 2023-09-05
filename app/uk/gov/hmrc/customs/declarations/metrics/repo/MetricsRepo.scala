@@ -22,8 +22,7 @@ import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Updates.push
 import org.mongodb.scala.model._
 import uk.gov.hmrc.customs.api.common.logging.CdsLogger
-import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics}
-import uk.gov.hmrc.customs.declarations.metrics.model.MetricsConfig
+import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, MetricsConfig}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -94,7 +93,8 @@ class MetricsMongoRepo @Inject()(mongo: MongoComponent,
 
     result.map {
       case Some(record) => record
-      case None         => logger.error(s"mongo error: findOneAndUpdate failed for: [${conversationMetric.conversationId}]")
+      case None =>
+        logger.debug(s"Failed to findOneAndUpdate as no existing record exists for: [${conversationMetric.conversationId}]")
         logger.debug(errorMsg)
         throw new IllegalStateException(errorMsg)
     }
