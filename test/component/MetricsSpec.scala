@@ -16,79 +16,75 @@
 
 package component
 
+import org.mockito.Mockito.when
 import org.mongodb.scala.bson.Document
-import org.scalatest.featurespec.AnyFeatureSpec
-import org.scalatest.matchers.should.Matchers
 import org.scalatest._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc._
 import play.api.test.Helpers
 import play.api.test.Helpers._
-import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetrics
+import uk.gov.hmrc.customs.declarations.metrics.model.MetricsConfig
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsMongoRepo
-import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import util.TestData.{InvalidDateTimeStampRequest, ValidRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MetricsSpec extends AnyFeatureSpec
-  with GivenWhenThen
+class MetricsSpec extends AnyWordSpecLike
+  with EitherValues
   with GuiceOneAppPerSuite
   with BeforeAndAfterEach
   with Matchers
-  with OptionValues
-  with DefaultPlayMongoRepositorySupport[ConversationMetrics] {
+  with OptionValues {
 
   lazy val repository: MetricsMongoRepo = app.injector.instanceOf[MetricsMongoRepo]
 
   implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
 
+  private val mockMetricsConfig = mock[MetricsConfig]
+  val twoWeeksInSeconds = 1209600
 
   override protected def beforeEach(): Unit = {
     await(repository.collection.deleteMany(Document.empty).toFuture())
+    when(mockMetricsConfig.ttlInSeconds).thenReturn(twoWeeksInSeconds)
   }
 
   override protected def afterEach(): Unit = {
     await(repository.collection.deleteMany(Document.empty).toFuture())
   }
 
-  Feature("Record time stamps in metrics service") {
+  "POST request with data is sent to the API" should {
+    "Record time stamps in metrics collection, respond with a 202 & empty response body" when {
+      "Valid Declaration Metric is received" in {
 
-    Scenario("Valid Declaration Metric is received") {
+        val result = route(app, ValidRequest)
 
-      Given("the API is available")
+        result shouldBe defined
+        val resultFuture: Future[Result] = result.value
+        status(resultFuture) shouldBe ACCEPTED
 
-      When("a POST request with data is sent to the API")
-      val result = route(app, ValidRequest)
-
-      Then("a response with a 202 status is received")
-      result shouldBe defined
-      val resultFuture: Future[Result] = result.value
-
-      status(resultFuture) shouldBe ACCEPTED
-
-      And("the response body is empty")
-      contentAsString(resultFuture) shouldBe empty
+        contentAsString(resultFuture) shouldBe empty
+      }
     }
 
 
-    Scenario("invalid Declaration Metric is received") {
+    "Record time stamps in metrics collection, respond with a 400 & response body contains the error" when {
+      "invalid Declaration Metric is received" in {
 
-      Given("the API is available")
 
-      When("a POST request with data is sent to the API")
-      val result = route(app, InvalidDateTimeStampRequest)
+        val result = route(app, InvalidDateTimeStampRequest)
 
-      Then("a response with a 400 status is received")
-      result shouldBe defined
-      val resultFuture: Future[Result] = result.value
+        result shouldBe defined
+        val resultFuture: Future[Result] = result.value
 
-      status(resultFuture) shouldBe BAD_REQUEST
+        status(resultFuture) shouldBe BAD_REQUEST
 
-      And("the response body contains the error")
-      contentAsString(resultFuture) shouldBe """{"code":"BAD_REQUEST","message":"Invalid Payload"}"""
+        contentAsString(resultFuture) shouldBe """{"code":"BAD_REQUEST","message":"Invalid Payload"}"""
+      }
+
     }
-
   }
 
 }
