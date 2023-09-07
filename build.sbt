@@ -4,6 +4,7 @@ import sbt._
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, targetJvm}
 import uk.gov.hmrc.gitstamp.GitStampPlugin._
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
+
 import scala.language.postfixOps
 
 name := "customs-declarations-metrics"
@@ -27,7 +28,7 @@ lazy val microservice = (project in file("."))
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
   .configs(testConfig: _*)
   .settings(
-    scalaVersion := "2.13.10",
+    scalaVersion := "2.13.11",
     targetJvm := "jvm-11",
     commonSettings,
     unitTestSettings,
