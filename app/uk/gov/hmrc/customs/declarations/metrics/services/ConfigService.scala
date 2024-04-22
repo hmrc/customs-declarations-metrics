@@ -17,8 +17,8 @@
 package uk.gov.hmrc.customs.declarations.metrics.services
 
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.customs.api.common.config.ConfigValidatedNelAdaptor
-import uk.gov.hmrc.customs.api.common.logging.CdsLogger
+import uk.gov.hmrc.customs.declarations.metrics.common.config.ConfigValidatedNelAdaptor
+import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.MetricsConfig
 
 @Singleton

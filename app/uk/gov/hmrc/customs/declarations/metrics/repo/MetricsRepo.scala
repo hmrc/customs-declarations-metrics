@@ -21,7 +21,7 @@ import org.mongodb.scala._
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Updates.push
 import org.mongodb.scala.model._
-import uk.gov.hmrc.customs.api.common.logging.CdsLogger
+import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, MetricsConfig}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}

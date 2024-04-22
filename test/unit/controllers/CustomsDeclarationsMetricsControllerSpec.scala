@@ -23,8 +23,8 @@ import play.api.libs.json.JsValue
 import play.api.mvc.{ControllerComponents, Request, Result}
 import play.api.test.Helpers
 import play.api.test.Helpers._
-import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
-import uk.gov.hmrc.customs.api.common.logging.CdsLogger
+import uk.gov.hmrc.customs.declarations.metrics.common.controllers.ErrorResponse
+import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController
 import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetric
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService

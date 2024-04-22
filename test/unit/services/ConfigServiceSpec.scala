@@ -18,8 +18,8 @@ package unit.services
 
 import com.typesafe.config.{Config, ConfigFactory}
 import play.api.Configuration
-import uk.gov.hmrc.customs.api.common.config.ConfigValidatedNelAdaptor
-import uk.gov.hmrc.customs.api.common.logging.CdsLogger
+import uk.gov.hmrc.customs.declarations.metrics.common.config.ConfigValidatedNelAdaptor
+import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.MetricsConfig
 import uk.gov.hmrc.customs.declarations.metrics.services.ConfigService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig

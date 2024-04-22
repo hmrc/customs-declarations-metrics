@@ -2,21 +2,23 @@ import sbt._
 
 object AppDependencies {
 
-  private val testScope = "test,it"
-  private val hmrcMongoVersion = "1.3.0"
-  private val apiCommonVersion = "1.60.0"
+  val playSuffix = "-play-30"
+
+  val bootstrapVersion = "8.0.0"
+  val hmrcMongoVersion = "1.7.0"
+  val scalamockVersion = "5.2.0"
 
   val compile = Seq(
-    "uk.gov.hmrc"                                %% "customs-api-common" % apiCommonVersion,
-    "uk.gov.hmrc.mongo"                          %% "hmrc-mongo-play-28" % hmrcMongoVersion
+    "uk.gov.hmrc"                                %% s"bootstrap-backend$playSuffix" % bootstrapVersion,
+    "org.typelevel"                              %% "cats-core"                    % "2.10.0",
+    "uk.gov.hmrc.mongo"                          %% s"hmrc-mongo$playSuffix"        % hmrcMongoVersion,
+    "com.typesafe.play" %% "play-json-joda" % "2.8.1"
   )
 
   val test = Seq(
-    "uk.gov.hmrc"            %% "customs-api-common"      % apiCommonVersion % testScope classifier "tests",
-    "org.scalatestplus.play" %% "scalatestplus-play"      % "5.1.0"          % testScope,
-    "org.wiremock"            %  "wiremock-standalone"     % "3.0.2"         % testScope,
-    "org.scalatestplus"      %% "mockito-3-4"             % "3.2.10.0"       % testScope,
-    "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % hmrcMongoVersion % testScope,
-    "com.vladsch.flexmark"   % "flexmark-all"             % "0.35.10"        % testScope
+    "org.scalatestplus" %% "scalatestplus-mockito" % "1.0.0-M2" % Test,
+    "uk.gov.hmrc"                                %% s"bootstrap-test$playSuffix"    % bootstrapVersion                % Test,
+    "uk.gov.hmrc.mongo"                          %% s"hmrc-mongo-test$playSuffix"   % "1.8.0"                         % Test,
+    "org.scalamock"                              %% "scalamock"                    % scalamockVersion                % Test
   )
 }

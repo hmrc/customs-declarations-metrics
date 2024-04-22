@@ -20,12 +20,13 @@ import javax.inject.{Inject, Singleton}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.{Action, BodyParser, ControllerComponents}
-import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.errorBadRequest
-import uk.gov.hmrc.customs.api.common.controllers.{ErrorResponse, ResponseContents}
-import uk.gov.hmrc.customs.api.common.logging.CdsLogger
+import uk.gov.hmrc.customs.declarations.metrics.common.controllers.ErrorResponse.errorBadRequest
+import uk.gov.hmrc.customs.declarations.metrics.common.controllers._
+import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model._
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 

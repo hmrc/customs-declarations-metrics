@@ -17,12 +17,10 @@
 package uk.gov.hmrc.customs.declarations.metrics.services
 
 import java.time.Duration
-
-import com.kenshoo.play.metrics.Metrics
 import java.util.concurrent.TimeUnit.NANOSECONDS
-
 import com.codahale.metrics.MetricRegistry
-import uk.gov.hmrc.customs.api.common.logging.CdsLogger
+import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 trait HasMetrics {
 
