@@ -18,7 +18,7 @@ package integration
 
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
-import uk.gov.hmrc.customs.declarations.metrics.config.{InvalidEnvironmentException, ServiceConfigProvider}
+import uk.gov.hmrc.customs.declarations.metrics.common.config.{InvalidEnvironmentException, ServiceConfigProvider}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import util.DynamicServiceTestData
 
