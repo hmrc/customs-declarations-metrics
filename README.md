@@ -36,22 +36,23 @@ To run performance tests, see [here](https://github.com/hmrc/customs-declaration
 | `/log-times` |       POST        | Allows submission of Timed Metrics. |
 
 
-### curl command
+### Declaration Event Curl Command
+A call with a **DECLARATION** event type will trigger a call to graphite for a metric named **'declaration-digital'** :
+
 ```
 curl -v -X POST http://localhost:9000/log-times \
     -H 'Accept: application/vnd.hmrc.1.0+json' \
     -d '{ "eventType": "DECLARATION", "conversationId": "dff783d7-44ee-4836-93d0-3242da7c225f", "eventStart": "2014-10-21T00:36:14.123Z", "eventEnd": "2014-10-21T00:38:14.123Z"}'
 ```
 
+### Notification Event Curl Command
+A call with a **NOTIFICATION** event type will trigger 3 calls to graphite one for a metric named **'declaration-round-trip'**, another for a metric named **'notification-digital'** and finally a metric named **'declaration-digital-total'** :
+
 ```
 curl -v -X POST http://localhost:9000/log-times \
     -H 'Accept: application/vnd.hmrc.1.0+json' \
     -d '{ "eventType": "NOTIFICATION", "conversationId": "dff783d7-44ee-4836-93d0-3242da7c225f", "eventStart": "2014-10-21T00:36:14.123Z", "eventEnd": "2014-10-21T00:38:14.123Z"}'
 ```
-
-A call with a **DECLARATION** event type will trigger a call to graphite for a metric named **'declaration-digital'**
-
-A call with a **NOTIFICATION** event type will trigger 3 calls to graphite one for a metric named **'declaration-round-trip'**, another for a metric named **'notification-digital'** and finally a metric named **'declaration-digital-total'**
 
 
 ### License
