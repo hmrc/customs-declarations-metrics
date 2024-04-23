@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.customs.declarations.metrics.services
+package uk.gov.hmrc.customs.declarations.metrics.common
 
-import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
+import play.api.inject.{Binding, Module}
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
-import javax.inject.{Inject, Singleton}
+class CustomsApiCommonModule extends Module {
 
-@Singleton
-class TestOnlyService @Inject() (metricsRepo: MetricsRepo) {
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
+    bind[HttpClient].to[DefaultHttpClient]
+  )
 
-  def deleteAll(): Unit = {
-    metricsRepo.deleteAll()
-  }
 }

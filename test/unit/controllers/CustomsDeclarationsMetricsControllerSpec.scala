@@ -23,14 +23,14 @@ import play.api.libs.json.JsValue
 import play.api.mvc.{ControllerComponents, Request, Result}
 import play.api.test.Helpers
 import play.api.test.Helpers._
-import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
-import uk.gov.hmrc.customs.api.common.logging.CdsLogger
+import uk.gov.hmrc.customs.declarations.metrics.common.controllers.ErrorResponse
+import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController
 import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetric
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
-import util.UnitSpec
 import util.MockitoPassByNameHelper.PassByNameVerifier
 import util.TestData._
+import util.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -82,9 +82,9 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec {
 
       PassByNameVerifier(mockLogger, "error")
         .withByNameParam[String]("JSON payload failed schema validation with error " +
-        "JsError(List((/conversationId,List(JsonValidationError(List(error.path.missing),ArraySeq()))), " +
-        "(/eventStart,List(JsonValidationError(List(error.path.missing),ArraySeq()))), " +
-        "(/eventEnd,List(JsonValidationError(List(error.path.missing),ArraySeq())))))")
+        "JsError(List((/conversationId,List(JsonValidationError(List(error.path.missing),List()))), " +
+        "(/eventStart,List(JsonValidationError(List(error.path.missing),List()))), " +
+        "(/eventEnd,List(JsonValidationError(List(error.path.missing),List())))))")
         .verify()
     }
 

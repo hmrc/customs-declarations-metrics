@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.services
 
-import java.time.{Duration, ZoneId, ZonedDateTime}
-import javax.inject.{Inject, Singleton}
-import com.kenshoo.play.metrics.Metrics
 import play.api.mvc.Result
-import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse
-import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorInternalServerError
-import uk.gov.hmrc.customs.api.common.logging.CdsLogger
+import uk.gov.hmrc.customs.declarations.metrics.common.controllers.ErrorResponse
+import uk.gov.hmrc.customs.declarations.metrics.common.controllers.ErrorResponse.ErrorInternalServerError
+import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics, Event, EventType}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import java.time.{Duration, ZoneId, ZonedDateTime}
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

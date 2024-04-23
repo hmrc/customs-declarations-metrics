@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.customs.declarations.metrics.controllers
+package integration
 
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.customs.declarations.metrics.services.TestOnlyService
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import org.scalatest.concurrent.Eventually
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import util.UnitSpec
 
-import javax.inject.{Inject, Singleton}
+trait IntegrationTestSpec extends UnitSpec
+  with BeforeAndAfterEach with BeforeAndAfterAll with Eventually
 
-@Singleton
-class TestOnlyController @Inject() (val testOnlyService: TestOnlyService,
-                                    val cc: ControllerComponents) extends BackendController(cc) {
-
-  def deleteAll(): Action[AnyContent] = Action {
-    testOnlyService.deleteAll()
-    Ok
-  }
-}

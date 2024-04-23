@@ -18,25 +18,25 @@ package unit.services
 
 
 import com.codahale.metrics.MetricRegistry
-import com.kenshoo.play.metrics.Metrics
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{RETURNS_DEEP_STUBS, verify, when}
 import play.api.test.Helpers
-import uk.gov.hmrc.customs.api.common.controllers.ErrorResponse.ErrorInternalServerError
-import uk.gov.hmrc.customs.api.common.logging.CdsLogger
+import uk.gov.hmrc.customs.declarations.metrics.common.controllers.ErrorResponse.ErrorInternalServerError
+import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, ConversationMetrics}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 import uk.gov.hmrc.customs.declarations.metrics.services.{HasMetrics, MetricsService}
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import util.TestData.{ConversationMetrics1, DeclarationConversationMetric, NotificationConversationMetric}
 import util.UnitSpec
 
 import java.time.Duration
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class MetricsServiceSpec extends UnitSpec {
 
   trait FakeHasMetrics extends HasMetrics{
-   var recordTimeArgumentCaptor = scala.collection.immutable.Map[String, Duration]()
+   var recordTimeArgumentCaptor: Map[String, Duration] = scala.collection.immutable.Map[String, Duration]()
     override lazy val registry: MetricRegistry = mock[MetricRegistry]
     override def recordTime(timerName: Metric, duration: Duration): Unit = {
       recordTimeArgumentCaptor = recordTimeArgumentCaptor + (timerName -> duration)
@@ -44,11 +44,11 @@ class MetricsServiceSpec extends UnitSpec {
   }
 
   trait SetUp {
-    private implicit val ec = Helpers.stubControllerComponents().executionContext
-    val mockMetrics = mock[Metrics]
-    val mockLogger = mock[CdsLogger]
-    val mockRepo = mock[MetricsRepo]
-    val mockMetricsRegistry = mock[MetricRegistry](RETURNS_DEEP_STUBS)
+    private implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
+    val mockMetrics: Metrics = mock[Metrics]
+    val mockLogger: CdsLogger = mock[CdsLogger]
+    val mockRepo: MetricsRepo = mock[MetricsRepo]
+    val mockMetricsRegistry: MetricRegistry = mock[MetricRegistry](RETURNS_DEEP_STUBS)
 
     when(mockMetrics.defaultRegistry).thenReturn(mockMetricsRegistry)
     val service = new MetricsService(mockLogger, mockRepo, mockMetrics) with FakeHasMetrics
@@ -90,7 +90,7 @@ class MetricsServiceSpec extends UnitSpec {
     "save a notification metric throws an Exception when update fails " in new SetUp() {
       when(mockRepo.updateWithFirstNotification(any[ConversationMetric])).thenThrow(new IllegalStateException("Some Error"))
 
-      val caught = intercept[IllegalStateException](await(service.process(NotificationConversationMetric)))
+      val caught: IllegalStateException = intercept[IllegalStateException](await(service.process(NotificationConversationMetric)))
 
       verify(mockRepo).updateWithFirstNotification(any[ConversationMetric])
       caught.getMessage shouldBe "Some Error"

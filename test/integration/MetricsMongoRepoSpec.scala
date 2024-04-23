@@ -20,16 +20,17 @@ import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.mongodb.scala.bson.Document
 import org.mongodb.scala.model.Filters
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.Helpers
-import uk.gov.hmrc.customs.api.common.logging.CdsLogger
+import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetrics, MetricsConfig}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsMongoRepo
 import uk.gov.hmrc.mongo.play.json.formats.MongoUuidFormats
 import util.TestData._
 import util.UnitSpec
+
 import scala.concurrent.ExecutionContext
 
 class MetricsMongoRepoSpec extends UnitSpec

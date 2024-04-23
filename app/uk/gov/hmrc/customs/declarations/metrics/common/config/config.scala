@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.customs.declarations.metrics.controllers
+package uk.gov.hmrc.customs.declarations.metrics.common
 
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.customs.declarations.metrics.services.TestOnlyService
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import cats.data.ValidatedNel
 
-import javax.inject.{Inject, Singleton}
+package object config {
 
-@Singleton
-class TestOnlyController @Inject() (val testOnlyService: TestOnlyService,
-                                    val cc: ControllerComponents) extends BackendController(cc) {
-
-  def deleteAll(): Action[AnyContent] = Action {
-    testOnlyService.deleteAll()
-    Ok
-  }
+  /*
+  we need this type alias which has only one parameterised type (ie fixes String) so that we can use the `mapN`
+  function in client code (note you will need import cats.implicits._)
+  */
+  type CustomsValidatedNel[A] = ValidatedNel[String, A]
 }
