@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.services
 
-import java.time.{Duration, ZoneId, ZonedDateTime}
-import javax.inject.{Inject, Singleton}
 import play.api.mvc.Result
 import uk.gov.hmrc.customs.declarations.metrics.common.controllers.ErrorResponse
 import uk.gov.hmrc.customs.declarations.metrics.common.controllers.ErrorResponse.ErrorInternalServerError
@@ -26,6 +24,8 @@ import uk.gov.hmrc.customs.declarations.metrics.model.{ConversationMetric, Conve
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import java.time.{Duration, ZoneId, ZonedDateTime}
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.controllers
 
-import javax.inject.{Inject, Singleton}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.{Action, BodyParser, ControllerComponents}
@@ -27,6 +26,7 @@ import uk.gov.hmrc.customs.declarations.metrics.model._
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 

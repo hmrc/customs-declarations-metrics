@@ -28,9 +28,9 @@ import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.controllers.CustomsDeclarationsMetricsController
 import uk.gov.hmrc.customs.declarations.metrics.model.ConversationMetric
 import uk.gov.hmrc.customs.declarations.metrics.services.MetricsService
-import util.UnitSpec
 import util.MockitoPassByNameHelper.PassByNameVerifier
 import util.TestData._
+import util.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try

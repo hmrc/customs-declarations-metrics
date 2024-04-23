@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.services
 
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.customs.declarations.metrics.common.config.ConfigValidatedNelAdaptor
 import uk.gov.hmrc.customs.declarations.metrics.common.logging.CdsLogger
 import uk.gov.hmrc.customs.declarations.metrics.model.MetricsConfig
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class ConfigService @Inject() (configValidatedNel: ConfigValidatedNelAdaptor, logger: CdsLogger) extends MetricsConfig {

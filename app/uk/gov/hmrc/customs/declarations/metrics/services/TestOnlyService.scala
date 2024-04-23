@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.customs.declarations.metrics.services
 
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.customs.declarations.metrics.repo.MetricsRepo
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class TestOnlyService @Inject() (metricsRepo: MetricsRepo) {

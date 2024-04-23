@@ -16,7 +16,6 @@
 
 package unit.common.controllers
 
-import javax.inject.Provider
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
@@ -28,6 +27,7 @@ import play.api.{Configuration, Environment, Mode, OptionalSourceMapper}
 import uk.gov.hmrc.customs.declarations.metrics.common.config.CustomsErrorHandler
 import util.UnitSpec
 
+import javax.inject.Provider
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 import scala.xml.{Node, Utility, XML}
