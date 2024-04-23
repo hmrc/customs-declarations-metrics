@@ -1,9 +1,9 @@
+import play.sbt.PlayImport.PlayKeys.playDefaultPort
 import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
 import sbt._
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, targetJvm}
 import uk.gov.hmrc.gitstamp.GitStampPlugin._
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 import scala.language.postfixOps
 
@@ -40,6 +40,7 @@ lazy val microservice = (project in file("."))
   .settings(scalacOptions ++= List(
     "-Wconf:cat=unused-imports&src=target/scala-2\\.13/routes/.*:s"
   ))
+  .settings(playDefaultPort := 9827)
 
 lazy val unitTestSettings =
   inConfig(Test)(Defaults.testTasks) ++
