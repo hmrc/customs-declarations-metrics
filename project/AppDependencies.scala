@@ -18,7 +18,7 @@ object AppDependencies {
   val test = Seq(
     "org.scalatestplus"                          %% "scalatestplus-mockito"        % "1.0.0-M2"                      % Test,
     "uk.gov.hmrc"                                %% s"bootstrap-test$playSuffix"    % bootstrapVersion                % Test,
-    "uk.gov.hmrc.mongo"                          %% s"hmrc-mongo-test$playSuffix"   % hmrcMongoVersion                         % Test,
+    "uk.gov.hmrc.mongo"                          %% s"hmrc-mongo-test$playSuffix"   % hmrcMongoVersion                % Test,
     "org.scalamock"                              %% "scalamock"                    % scalamockVersion                % Test
   )
 }
