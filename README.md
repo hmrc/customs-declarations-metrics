@@ -46,7 +46,7 @@ curl -v -X POST http://localhost:9000/log-times \
 ```
 
 ### Notification Event Curl Command
-A call with a **NOTIFICATION** event type will trigger 3 calls to graphite one for a metric named **'declaration-round-trip'**, another for a metric named **'notification-digital'** and finally a metric named **'declaration-digital-total'** :
+A call with a **NOTIFICATION** event type will trigger 3 calls to graphite (one for a metric named **'declaration-round-trip'**, another for a metric named **'notification-digital'** and finally a metric named **'declaration-digital-total'**) :
 
 ```
 curl -v -X POST http://localhost:9000/log-times \
