@@ -16,9 +16,7 @@
 
 package util
 
-import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
-import uk.gov.hmrc.play.audit.AuditModule
-import uk.gov.hmrc.play.bootstrap.backend.BackendModule
+import play.api.inject.guice.GuiceApplicationBuilder
 
 trait DynamicServiceTestData {
 
@@ -42,7 +40,7 @@ trait DynamicServiceTestData {
   protected val defaultEnvironment = "default"
 
   val configuredApplication = GuiceApplicationBuilder(
-    modules = Seq(GuiceableModule.guiceable(new AuditModule), GuiceableModule.guiceable(new BackendModule))).
+    modules = Seq()).
     configure(
       Map(
         "play.http.router" -> "dynamicservice.Routes",

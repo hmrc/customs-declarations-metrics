@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package integration
 
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
-import uk.gov.hmrc.customs.declarations.metrics.common.config.{InvalidEnvironmentException, ServiceConfigProvider}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.customs.declarations.metrics.common.config.{InvalidEnvironmentException, ServiceConfigProvider}
 import util.DynamicServiceTestData
 
 class ServiceConfigProviderSpec extends IntegrationTestSpec with GuiceOneAppPerSuite with DynamicServiceTestData {
