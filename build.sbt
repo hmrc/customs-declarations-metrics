@@ -29,7 +29,6 @@ lazy val microservice = (project in file("."))
   .configs(testConfig: _*)
   .settings(
     scalaVersion := "2.13.13",
-    targetJvm := "jvm-11",
     commonSettings,
     unitTestSettings,
     integrationComponentTestSettings,
