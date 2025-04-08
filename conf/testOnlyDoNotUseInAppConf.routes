@@ -11,4 +11,4 @@
 
 ->        /test-only/service                dynamicservice.Routes
 ->        /                                 prod.Routes
-DELETE    /metrics/test-only/all            uk.gov.hmrc.customs.declarations.metrics.controllers.TestOnlyController.deleteAll()
+DELETE    /metrics/test-only/all            uk.gov.hmrc.customs.declarations.metrics.testControllers.TestOnlyController.deleteAll()
