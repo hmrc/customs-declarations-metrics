@@ -28,7 +28,7 @@ class ConfigService @Inject() (configValidatedNel: ConfigValidatedNelAdaptor, lo
   private case class MetricsConfigImpl(ttlInSeconds: Int) extends MetricsConfig
 
   private val config = {
-    val validatedConfig = configValidatedNel.root.int("ttlInSeconds") map MetricsConfigImpl
+    val validatedConfig = configValidatedNel.root.int("ttlInSeconds") map this.MetricsConfigImpl.apply
     validatedConfig.fold({
       nel => // error case exposes nel (a NotEmptyList)
         val errorMsg = "\n" + nel.toList.mkString("\n")
