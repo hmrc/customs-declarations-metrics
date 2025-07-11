@@ -81,10 +81,7 @@ class CustomsDeclarationsMetricsControllerSpec extends UnitSpec {
       }
 
       PassByNameVerifier(mockLogger, "error")
-        .withByNameParam[String]("JSON payload failed schema validation with error " +
-        "JsError(List((/conversationId,List(JsonValidationError(List(error.path.missing),List()))), " +
-        "(/eventStart,List(JsonValidationError(List(error.path.missing),List()))), " +
-        "(/eventEnd,List(JsonValidationError(List(error.path.missing),List())))))")
+        .withByNameParam[String]("JSON payload failed schema validation with error JsError(List((/conversationId,List(JsonValidationError(List(error.path.missing),ArraySeq()))), (/eventStart,List(JsonValidationError(List(error.path.missing),ArraySeq()))), (/eventEnd,List(JsonValidationError(List(error.path.missing),ArraySeq())))))")
         .verify()
     }
 

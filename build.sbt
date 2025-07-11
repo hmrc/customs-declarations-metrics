@@ -28,7 +28,7 @@ lazy val microservice = (project in file("."))
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
   .configs(testConfig: _*)
   .settings(
-    scalaVersion := "2.13.16",
+    scalaVersion := "3.3.6",
     commonSettings,
     unitTestSettings,
     integrationComponentTestSettings,
@@ -36,9 +36,8 @@ lazy val microservice = (project in file("."))
     scoverageSettings
   )
   .settings(majorVersion := 0)
-  .settings(scalacOptions ++= List(
-    "-Wconf:cat=unused-imports&src=target/scala-2\\.13/routes/.*:s"
-  ))
+  .settings(scalacOptions  += "-Wconf:src=routes/.*:s")
+  .settings(scalacOptions  += "-Wconf:msg=Flag.*repeatedly:s")
   .settings(playDefaultPort := 9827)
 
 lazy val unitTestSettings =

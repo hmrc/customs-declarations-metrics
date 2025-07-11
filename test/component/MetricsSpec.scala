@@ -18,6 +18,7 @@ package component
 
 import org.mockito.Mockito.when
 import org.mongodb.scala.bson.Document
+import org.mongodb.scala.SingleObservableFuture
 import org.scalatest._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
