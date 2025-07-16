@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sbt clean scalastyle coverage testAll coverageReport dependencyUpdates
+sbt clean coverage testAll coverageReport dependencyUpdates

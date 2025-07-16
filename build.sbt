@@ -74,8 +74,6 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
 def integrationComponentTestFilter(name: String): Boolean = (name startsWith "integration") || (name startsWith "component")
 def unitTestFilter(name: String): Boolean = name startsWith "unit"
 
-scalastyleConfig := baseDirectory.value / "project" / "scalastyle-config.xml"
-
 Compile / unmanagedResourceDirectories += baseDirectory.value / "public"
 
 libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
