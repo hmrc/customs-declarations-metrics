@@ -3,3 +3,4 @@ repoVisibility: public_0C3F0CE3E6E6448FAD341E7BFA50FCD333E06A20CFF05FCACE61154DD
 description: The Customs Declarations Metrics service is used by customs-declarations and customs-notification to handle sending metrics to graphite. These metric events are persisted in a mongo collection associated with this service.
 test-repositories:
   - customs-automation-test
+serviceNowMapping: SNSVC0019200
